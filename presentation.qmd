@@ -110,20 +110,17 @@ if (res$trafic_disponible) {
 - **Biais d'effort** : on voit les dauphins là où il y a des observateurs — souvent depuis des bateaux, ce qui gonfle le chevauchement avec le trafic
 - **Pas de photo-identification** : impossible de distinguer les groupes résidents
 - **Résolution** grossière pour une espèce côtière
-- **Hétérogénéité temporelle** des observations
+- **Décalage dans le temps** : observations surtout de 2001 à 2010 (2 seulement après 2015), trafic de 2023
 
 ::: notes
-C'est le cœur du message : je sais ce que l'analyse permet et ne permet pas. Ces limites justifient exactement les actions prévues dans Delfinu.
+C'est le cœur du message : je sais ce que l'analyse permet et ne permet pas. Les résultats sont à lire comme une démonstration de méthode, pas comme un état des lieux.
 :::
 
-## Ce que je proposerais pour Delfinu
+## Une méthode réutilisable
 
-1. **Base de données commune** avec Iroise (Darwin Core, compatible SINP)
-2. **Sorties à effort connu** (traces GPS) pour corriger le biais d'observation
-3. **Protocole d'interactions** : groupe, comportement avant / pendant / après, type d'activité, distance, nombre de bateaux, réaction
-4. **Entretiens avec les pêcheurs** sur les interactions avec les filets
-5. **Photo-identification** pour suivre les groupes résidents
-6. **Sensibilisation** des usagers dans les zones de chevauchement
+- Objectif de l'exercice : montrer que je sais mener **toute la chaîne d'analyse**, de la donnée brute à la carte et à la note
+- Le Parc dispose sans doute de **données plus récentes et plus complètes**
+- Le script est prêt à les accueillir : un fichier d'observations (longitude, latitude, date) suffit pour **relancer toute l'analyse**
 
 ## Ce que j'apporte au projet
 
@@ -131,15 +128,15 @@ C'est le cœur du message : je sais ce que l'analyse permet et ne permet pas. Ce
 ::: {.column width="50%"}
 **Analyse**
 
-- Données ouvertes, bancarisation, R, SIG
-- Méthode reproductible et critique
+- Bancarisation, R, QGIS, statistiques
+- Méthode reproductible et regard critique sur les données
 :::
 ::: {.column width="50%"}
-**Terrain et transmission**
+**Acteurs, transmission, mer**
 
-- *[À compléter : ton expérience de terrain]*
-- *[À compléter : vulgarisation, animation, publics]*
-- *[À compléter : travail avec des usagers, des acteurs locaux]*
+- Coordination d'un réseau de partenaires (dispositif relais d'Annecy)
+- Vulgarisation scientifique au quotidien (enseignante SVT)
+- Planche à voile, navigation à la voile : usagère de la mer moi-même
 :::
 :::
 

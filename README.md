@@ -4,15 +4,16 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 
 **Auteure :** Gwladys Helaine — octobre 2026
 
-**À lire en premier :** [`note.pdf`](note.pdf), la note de synthèse (méthodes, résultats, limites, propositions).
+**À lire en premier :** [`note.pdf`](note.pdf), la note de synthèse (méthodes, résultats, limites, conclusion).
 
 ## Principaux résultats
 
 - 1 329 enregistrements bruts (OBIS, GBIF) → **161 observations** retenues dans le Parc après nettoyage (échouages, doublons, localisations imprécises, points à terre).
 - Cœur du domaine vital (noyau 50 %) : **136 km²**, dans le golfe de Saint-Florent ; domaine vital (noyau 95 %) : **1 165 km²**.
 - Observations côtières : profondeur médiane de 60 m contre 1 962 m pour le milieu disponible.
-- Trafic de plaisance (AIS) **3,3 fois** plus dense dans le cœur du domaine vital que dans le reste du Parc.
-- Limite principale : 78 % des observations proviennent d'une seule base opportuniste ; la répartition reflète aussi l'effort d'observation.
+- Robustesse : avec une largeur de bande réduite de moitié, 98 % du cœur recalculé reste dans le cœur de référence.
+- Densité médiane de navires (AIS) **2,0 fois** plus élevée dans le cœur du domaine vital que dans le reste du Parc, et **3,3 fois** pour la plaisance ; la surreprésentation des zones de fort trafic dans le domaine vital se maintient quel que soit le seuil testé.
+- Limites principales : 78 % des observations proviennent d'une seule base opportuniste (la répartition reflète aussi l'effort d'observation), et 83 % datent de 2001 à 2010 alors que le trafic date de 2023. Les résultats illustrent une méthode plus qu'ils ne décrivent la situation actuelle.
 
 ## Contenu du dépôt
 
@@ -27,6 +28,7 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 | `journal_nettoyage.csv` | Nombre d'observations restant après chaque règle de nettoyage |
 | `dictionnaire_donnees.csv` | Description de chaque colonne des données nettoyées |
 | `surfaces_domaine_vital.csv`, `habitat_resume.csv`, `modele_habitat.csv`, `trafic_par_zone.csv` | Résultats chiffrés |
+| `sensibilite_domaine_vital.csv` | Analyse de sensibilité du domaine vital (largeur de bande réduite de moitié) |
 | `delfinu-exercice.Rproj` | Projet RStudio |
 
 ## Reproduire l'analyse
@@ -45,4 +47,4 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 
 ## Méthodes
 
-Estimation du domaine vital par noyau (isoplèthes 50 % et 95 %, largeur de bande href) et polygone convexe minimum ; comparaison utilisation / disponibilité de l'habitat (tests de Wilcoxon, régression logistique) ; comparaison de la densité de navires entre zones du domaine vital. Outils : R (sf, terra, dplyr, ggplot2), QGIS, Quarto.
+Estimation du domaine vital par noyau (isoplèthes 50 % et 95 %, largeur de bande href) et polygone convexe minimum, avec analyse de sensibilité à la largeur de bande ; comparaison utilisation / disponibilité de l'habitat (tests de Wilcoxon, régression logistique) ; comparaison de la densité de navires entre zones du domaine vital, avec test de sensibilité au seuil de fort trafic. Outils : R (sf, terra, dplyr, ggplot2), QGIS, Quarto.

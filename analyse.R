@@ -494,6 +494,44 @@ resultats$domaine_vital <- rbind(domaine_vital, mcp95) |>
   st_drop_geometry() |>
   mutate(part_du_parc_pct = 100 * surface_km2 / resultats$surface_zone_km2)
 
+# 4c. Analyse de sensibilité : la largeur de bande de référence (href) tend à
+# surlisser. On recalcule le domaine vital avec une largeur de bande réduite de
+# moitié et on vérifie si le cœur reste au même endroit.
+FACTEUR_SENSIBILITE <- 0.5
+
+volume_kde <- function(hh) {
+  k <- MASS::kde2d(xy_parc[, 1], xy_parc[, 2], h = 4 * hh, n = 300,
+                   lims = c(emp[["xmin"]], emp[["xmax"]], emp[["ymin"]], emp[["ymax"]]))
+  r <- rast(kde)                                   # même grille que le KDE de référence
+  values(r) <- as.vector(k$z[, ncol(k$z):1])
+  r <- mask(r, vect(zone_etude))
+  v <- values(r, mat = FALSE); ok <- !is.na(v)
+  o <- order(v[ok], decreasing = TRUE)
+  cu <- numeric(sum(ok)); cu[o] <- cumsum(v[ok][o]) / sum(v[ok])
+  vol <- rep(NA_real_, length(v)); vol[ok] <- cu
+  setValues(r, vol)
+}
+contour_iso <- function(vol, p) st_union(st_geometry(st_as_sf(as.polygons(ifel(vol <= p, 1, NA)))))
+aire_km2 <- function(g) if (length(g) == 0 || all(st_is_empty(g))) 0 else as.numeric(sum(st_area(g))) / 1e6
+
+vol_sens   <- volume_kde(FACTEUR_SENSIBILITE * href)
+coeur_sens <- contour_iso(vol_sens, 0.50)
+dv95_sens  <- contour_iso(vol_sens, 0.95)
+coeur_ref  <- st_geometry(iso50)
+recouvrement <- aire_km2(suppressWarnings(st_intersection(coeur_sens, coeur_ref)))
+
+resultats$sensibilite_kde <- data.frame(
+  facteur_h = FACTEUR_SENSIBILITE,
+  h_km = FACTEUR_SENSIBILITE * href / 1000,
+  surface_coeur_km2 = aire_km2(coeur_sens),
+  surface_dv95_km2  = aire_km2(dv95_sens),
+  # Part du cœur « sensibilité » située dans le cœur de référence
+  part_coeur_dans_reference_pct = 100 * recouvrement / aire_km2(coeur_sens)
+)
+message("Sensibilité (h x ", FACTEUR_SENSIBILITE, ") : cœur = ",
+        round(resultats$sensibilite_kde$surface_coeur_km2), " km², dont ",
+        round(resultats$sensibilite_kde$part_coeur_dans_reference_pct), " % dans le cœur de référence.")
+
 
 # ---- 5. Habitat : utilisation vs disponibilité -----------------------------
 
@@ -586,18 +624,35 @@ if (resultats$trafic_disponible) {
              couche = nom)
     trafic_valeurs[[nom]] <- df
 
-    # Part des zones de fort trafic (>= 75e percentile du Parc) dans le domaine vital
-    seuil <- quantile(df$trafic, 0.75)
-    fort  <- df$trafic >= seuil
-    part_fort_dans_dv <- mean(df$zone[fort] != "Reste du Parc")
-    part_surface_dv   <- mean(df$zone != "Reste du Parc")
+    # Zones de fort trafic : cellules au-dessus du 3e quartile des valeurs du Parc
+    # (seuil relatif, recalculé pour chaque catégorie de navires)
+    seuil <- unname(quantile(df$trafic, 0.75))
+    fort  <- df$trafic > seuil
+    part_surface_dv <- mean(df$zone != "Reste du Parc")
+    # Si la majorité des cellules ont une densité nulle (cas de la pêche équipée
+    # de l'AIS), le seuil est proche de zéro et l'indicateur n'a pas de sens
+    part_nulle <- mean(df$trafic == 0)
+    indicateur_ok <- part_nulle < 0.5 && seuil > 0
+    part_fort_dans_dv <- if (indicateur_ok) mean(df$zone[fort] != "Reste du Parc") else NA_real_
+    # Sensibilité au choix du seuil : 50 % et 10 % des cellules les plus fréquentées
+    part_fort_seuil <- function(prob) {
+      if (!indicateur_ok) return(NA_real_)
+      s <- unname(quantile(df$trafic, prob))
+      mean(df$zone[df$trafic > s] != "Reste du Parc")
+    }
+    part_fort_q50 <- part_fort_seuil(0.50)
+    part_fort_q90 <- part_fort_seuil(0.90)
 
     trafic_resume[[nom]] <- df |>
       group_by(zone) |>
       summarise(trafic_moyen = mean(trafic), trafic_median = median(trafic),
                 .groups = "drop") |>
       mutate(couche = nom,
+             seuil_fort_trafic = seuil,
+             part_cellules_nulles_pct = 100 * part_nulle,
              part_fort_trafic_dans_dv_pct = 100 * part_fort_dans_dv,
+             part_fort_q50_dans_dv_pct = 100 * part_fort_q50,
+             part_fort_q90_dans_dv_pct = 100 * part_fort_q90,
              part_surface_dv_pct = 100 * part_surface_dv)
   }
   resultats$trafic <- bind_rows(trafic_resume)
@@ -920,6 +975,7 @@ writeRaster(dist_cote, "outputs/sig/distance_cote_l93.tif", overwrite = TRUE)
 
 # 8c. Tableaux
 readr::write_csv(resultats$domaine_vital, "outputs/tableaux/surfaces_domaine_vital.csv")
+readr::write_csv(resultats$sensibilite_kde, "outputs/tableaux/sensibilite_domaine_vital.csv")
 readr::write_csv(resultats$habitat_resume, "outputs/tableaux/habitat_resume.csv")
 readr::write_csv(resultats$glm, "outputs/tableaux/modele_habitat.csv")
 if (resultats$trafic_disponible) {
