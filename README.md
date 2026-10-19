@@ -6,6 +6,12 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 
 **À lire en premier :** [`note.pdf`](note.pdf), la note de synthèse (méthodes, résultats, limites, conclusion).
 
+<p align="center">
+  <img src="carte_domaine_vital.png" width="49%" alt="Domaine vital estimé du grand dauphin">
+  <img src="carte_trafic.png" width="49%" alt="Trafic maritime et domaine vital">
+</p>
+<p align="center"><em>À gauche : domaine vital estimé (isoplèthes 50 % et 95 %). À droite : densité de navires (AIS, 2023) et domaine vital.</em></p>
+
 ## Principaux résultats
 
 - 1 329 enregistrements bruts (OBIS, GBIF) → **161 observations** retenues dans le Parc après nettoyage (échouages, doublons, localisations imprécises, points à terre).
