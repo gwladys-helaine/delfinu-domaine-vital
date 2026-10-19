@@ -1,0 +1,195 @@
+---
+title: "Domaine vital du grand dauphin dans le Parc naturel marin du Cap Corse et de l'Agriate et chevauchement avec le trafic maritime"
+subtitle: "Analyse exploratoire de données ouvertes — exercice préparatoire au projet Delfinu"
+author: "Gwladys Helaine"
+date: today
+date-format: "D MMMM YYYY"
+lang: fr
+format:
+  html:
+    embed-resources: true
+    toc: false
+    theme: cosmo
+    fontsize: 0.95em
+  typst:
+    papersize: a4
+    margin:
+      x: 1.6cm
+      y: 1.4cm
+    fontsize: 9.5pt
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+res <- readRDS("outputs/resultats.rds")
+
+fmt <- function(x, d = 0) format(round(x, d), big.mark = " ", decimal.mark = ",", nsmall = d)
+fp  <- function(p) if (p < 0.001) "< 0,001" else paste("=", fmt(p, 3))
+
+dv    <- res$domaine_vital
+s50   <- dv[dv$niveau == "KDE 50 %", ]
+s95   <- dv[dv$niveau == "KDE 95 %", ]
+smcp  <- dv[dv$niveau == "MCP 95 %", ]
+h_obs <- res$habitat_resume[res$habitat_resume$type == "Observations", ]
+h_dis <- res$habitat_resume[res$habitat_resume$type != "Observations", ]
+or_prof <- res$glm[grepl("prof", res$glm$variable), ]
+pct_jeu1 <- 100 * res$par_jeu$n[1] / sum(res$par_jeu$n)
+nom_jeu1 <- res$par_jeu$jeu_donnees[1]
+if (grepl("OGREVA", nom_jeu1, ignore.case = TRUE)) nom_jeu1 <- "base OGREVA, DREAL Corse"
+note_glm <- gsub("0.7", "0,7", res$note_glm, fixed = TRUE)
+# Lecture du rapport de cotes : effet d'une augmentation d'un écart-type du log de la profondeur
+lecture_or <- if (or_prof$odds_ratio < 1) {
+  paste0("autrement dit, la probabilité relative d'observer des grands dauphins est divisée par environ ",
+         fmt(1 / or_prof$odds_ratio, 0), " quand la profondeur (en échelle logarithmique) augmente d'un écart-type")
+} else {
+  paste0("autrement dit, la probabilité relative d'observer des grands dauphins est multipliée par environ ",
+         fmt(or_prof$odds_ratio, 1), " quand la profondeur (en échelle logarithmique) augmente d'un écart-type")
+}
+```
+
+```{r}
+#| label: alertes
+#| output: asis
+if (!res$parc_officiel) {
+  cat("::: {.callout-warning}\nCette version utilise une emprise **approximative** du Parc. ",
+      "Charger la couche officielle avant diffusion.\n:::\n\n")
+}
+if (res$n_parc < 30) {
+  cat("::: {.callout-warning}\nAvec ", res$n_parc, " observations seulement, les surfaces ",
+      "de domaine vital sont très incertaines : ce travail illustre surtout la méthode.\n:::\n\n")
+}
+```
+
+## Contexte et objectif
+
+Le projet Delfinu, co-porté par les parcs naturels marins du Cap Corse et de l'Agriate et d'Iroise, vise à comprendre et réduire les pressions humaines sur les grands dauphins résidents. Sa première étape est d'**étudier le domaine vital de l'espèce dans le Parc à partir des données existantes**. Cet exercice en propose une version exploratoire, entièrement reproductible, fondée sur des données publiques : où les grands dauphins sont-ils observés dans le Parc, dans quel habitat, et dans quelle mesure ces zones se superposent-elles au trafic maritime ?
+
+## Données et méthodes
+
+- **Observations** : *Tursiops truncatus* dans les portails OBIS et GBIF (téléchargement automatisé sous R), filtrées puis bancarisées avec un journal de nettoyage et un dictionnaire de données.
+- **Environnement** : bathymétrie NOAA ETOPO 2022 (résolution d'environ `r fmt(round(res$resolution_bathy_m, -1))` m), distance à la côte calculée sous R ; périmètre du Parc issu de la base des espaces protégés (PatriNat, 07/2026) ; analyses en Lambert-93.
+- **Domaine vital** : estimation par noyau (KDE, largeur de bande de référence *h*~ref~ = `r fmt(res$href_km, 1)` km), isoplèthes 50 % (cœur) et 95 %, comparées à un polygone convexe minimum (MCP 95 %).
+- **Habitat** : comparaison utilisation / disponibilité (`r fmt(res$n_parc)` observations contre des points tirés au hasard dans la partie marine du Parc), tests de Wilcoxon et régression logistique.
+- **Pressions** : densité de navires EMODnet Human Activities (moyenne annuelle 2023, dernière année complète ; tous navires, plaisance, pêche), comparée entre le cœur du domaine vital, le reste du domaine vital et le reste du Parc.
+
+```{r}
+#| label: nettoyage
+#| output: asis
+j <- res$journal
+retire <- function(motif) {
+  i <- grep(motif, j$etape)[1]
+  if (is.na(i) || i == 1) 0 else j$n_restant[i - 1] - j$n_restant[i]
+}
+cat("**Bancarisation.** Le nettoyage a ramené les ", fmt(j$n_restant[1]),
+    " enregistrements bruts à ", fmt(tail(j$n_restant, 1)), " observations exploitables dans le Parc : ",
+    fmt(retire("chouage")), " échouages (animaux morts sur la côte) exclus, ",
+    fmt(retire("Doublons")), " doublons entre portails supprimés, ",
+    fmt(retire("Date")), " observations antérieures à 2000 ou non datées, ",
+    fmt(retire("Précision")), " localisations trop imprécises (> 5 km), ",
+    fmt(retire("terre")), " points à terre, ",
+    fmt(retire("Agrégation")), " positions répétées d'un même groupe le même jour, et ",
+    fmt(retire("dans le Parc")), " observations situées hors du Parc.\n\n", sep = "")
+```
+
+::: {.content-visible when-format="html"}
+```{r}
+#| label: tbl-journal
+#| tbl-cap: "Journal de nettoyage des observations"
+knitr::kable(res$journal, col.names = c("Étape", "Observations restantes"))
+```
+:::
+
+## Résultats
+
+Après nettoyage, **`r fmt(res$n_parc)` observations** réalisées entre `r res$annees[1]` et `r res$annees[2]` sont situées dans le Parc. Le **cœur du domaine vital (KDE 50 %) couvre `r fmt(s50$surface_km2)` km²**, soit `r fmt(s50$part_du_parc_pct, 1)` % de la partie marine du Parc, et le **domaine vital à 95 % couvre `r fmt(s95$surface_km2)` km²** (`r fmt(s95$part_du_parc_pct, 1)` %). Le MCP 95 % donne `r fmt(smcp$surface_km2)` km².
+
+![Domaine vital estimé (noyau, isoplèthes 50 % et 95 %)](outputs/figures/carte_domaine_vital.png){#fig-carte width=74%}
+
+Les observations se situent à une profondeur médiane de **`r fmt(h_obs$prof_mediane_m)` m** contre `r fmt(h_dis$prof_mediane_m)` m pour le milieu disponible (Wilcoxon, p `r fp(res$test_prof$p.value)`), et à `r fmt(h_obs$dist_mediane_km, 1)` km de la côte contre `r fmt(h_dis$dist_mediane_km, 1)` km (p `r fp(res$test_dist$p.value)`). Dans le modèle logistique, le rapport de cotes associé à la profondeur est de `r fmt(or_prof$odds_ratio, 2)` (IC 95 % : `r fmt(or_prof$ic95_bas, 2)`–`r fmt(or_prof$ic95_haut, 2)`) : `r lecture_or`. `r note_glm`
+
+![Habitat utilisé et milieu disponible](outputs/figures/habitat_profondeur_cote.png){#fig-habitat width=62%}
+
+```{r}
+#| label: trafic
+#| output: asis
+if (res$trafic_disponible) {
+  tr <- res$trafic[res$trafic$couche == unique(res$trafic$couche)[1], ]
+  coeur <- tr[tr$zone == "Cœur (KDE 50 %)", ]
+  reste <- tr[tr$zone == "Reste du Parc", ]
+  nom_tr <- sub("tous navires", "tous navires", gsub("_", " ", tr$couche[1]))
+  cat("Pour le trafic **", nom_tr, "** (moyenne annuelle AIS), la densité médiane de navires est de ",
+      fmt(coeur$trafic_median, 2), " dans le cœur du domaine vital contre ",
+      fmt(reste$trafic_median, 2), " heure par km² et par mois dans le reste du Parc. Le domaine vital à 95 % ",
+      "représente ", fmt(tr$part_surface_dv_pct[1], 1), " % de la surface du Parc mais ",
+      "contient **", fmt(tr$part_fort_trafic_dans_dv_pct[1], 1), " % des zones de fort trafic** ",
+      "(quart supérieur des valeurs du Parc).\n\n", sep = "")
+  cat("![Trafic maritime (AIS, 2023) et domaine vital](outputs/figures/carte_trafic.png){#fig-trafic width=74%}\n\n")
+} else {
+  cat("*La partie « pressions » n'a pas été calculée : aucun raster de trafic fourni.*\n\n")
+}
+```
+
+## Interprétation
+
+```{r}
+#| label: interpretation
+#| output: asis
+txt <- paste0(
+  "Les observations se concentrent dans le golfe de Saint-Florent et le long de la côte ouest ",
+  "du Cap Corse, sur le plateau continental (profondeur médiane de ", fmt(h_obs$prof_mediane_m),
+  " m contre ", fmt(h_dis$prof_mediane_m), " m pour le milieu disponible) et près des côtes (",
+  fmt(h_obs$dist_mediane_km, 1), " km contre ", fmt(h_dis$dist_mediane_km, 1), " km). ",
+  "Ce schéma est cohérent avec le caractère côtier des grands dauphins de Méditerranée, ",
+  "mais il reflète aussi la répartition de l'effort d'observation : ", fmt(pct_jeu1),
+  " % des données proviennent d'une même base opportuniste.")
+if (res$trafic_disponible) {
+  med <- function(couche, zone) {
+    v <- res$trafic$trafic_median[res$trafic$couche == couche & res$trafic$zone == zone]
+    if (length(v) == 0) NA else v
+  }
+  couches <- unique(res$trafic$couche)
+  c_tous <- couches[grepl("tous", couches)][1]
+  c_plai <- couches[grepl("plaisance", couches)][1]
+  r_tous <- med(c_tous, "Cœur (KDE 50 %)") / med(c_tous, "Reste du Parc")
+  part_fort <- res$trafic$part_fort_trafic_dans_dv_pct[res$trafic$couche == c_tous][1]
+  part_surf <- res$trafic$part_surface_dv_pct[res$trafic$couche == c_tous][1]
+  txt <- paste0(txt, "\n\nLe cœur du domaine vital coïncide avec la zone la plus fréquentée du Parc, ",
+    "autour du port de Saint-Florent : la densité médiane de navires y est ", fmt(r_tous, 1),
+    " fois plus élevée que dans le reste du Parc")
+  if (!is.na(c_plai)) {
+    r_plai <- med(c_plai, "Cœur (KDE 50 %)") / med(c_plai, "Reste du Parc")
+    txt <- paste0(txt, ", et ", fmt(r_plai, 1), " fois pour la plaisance")
+  }
+  txt <- paste0(txt, ". Le domaine vital à 95 % contient ", fmt(part_fort), " % des zones de ",
+    "fort trafic pour ", fmt(part_surf), " % de la surface du Parc. ",
+    "Ces résultats suggèrent une exposition des grands dauphins aux activités nautiques côtières, ",
+    "en particulier à la plaisance, sans permettre de mesurer de véritables interactions : ",
+    "c'est l'objet du protocole proposé ci-dessous. La pêche équipée d'AIS est quasi absente ",
+    "des données, ce qui traduit l'absence d'AIS sur les petites unités artisanales plutôt ",
+    "qu'une absence d'activité.")
+}
+cat(txt, "\n")
+```
+
+## Limites
+
+- **Biais d'effort d'observation** : `r fmt(pct_jeu1)` % des observations retenues proviennent d'un seul jeu de données opportuniste (`r nom_jeu1`). Les dauphins sont vus là où il y a des observateurs, souvent près des côtes et des ports : le domaine vital estimé reflète autant l'effort que l'usage réel de l'espace, et le chevauchement avec le trafic est en partie artificiel (les observations viennent souvent de bateaux).
+- **Méthode** : la largeur de bande de référence (*h*~ref~) tend à lisser fortement la densité et à surestimer le domaine vital ; ici le noyau à 95 % (`r fmt(s95$surface_km2)` km²) est près de deux fois plus étendu que le MCP 95 % (`r fmt(smcp$surface_km2)` km²). Une analyse de sensibilité (largeurs de bande plus faibles, validation croisée) serait nécessaire avant toute utilisation en gestion.
+- **Pas d'identification individuelle** : sans photo-identification, impossible de distinguer les groupes résidents des individus de passage, ni d'estimer un domaine vital par groupe.
+- **Trafic sous-estimé près des côtes** : les données EMODnet proviennent de l'AIS, obligatoire seulement pour les grands navires ; la plupart des petites embarcations de plaisance et de pêche, majoritaires en zone côtière, n'y figurent pas.
+- **Résolution** : bathymétrie à environ `r fmt(round(res$resolution_bathy_m, -1))` m et trafic à 1 km, encore grossiers pour décrire la bande côtière où vit l'espèce.
+- **Hétérogénéité temporelle** : observations réparties sur plusieurs décennies et saisons, alors que le trafic est une moyenne sur une période donnée.
+
+## Proposition pour Delfinu
+
+1. **Rassembler et standardiser les données existantes** : obtenir auprès de leurs producteurs (DREAL Corse – base OGREVA, GIS3M, Observatoire Pelagis) les données brutes et l'effort d'observation associé, et les réunir dans une base commune avec le PNM d'Iroise, au format Darwin Core, compatible avec le SINP.
+2. **Collecter avec un effort connu** : sorties standardisées avec trace GPS de l'effort, pour corriger le biais d'observation et passer à des modèles d'occupation ou de densité.
+3. **Protocole d'interactions** : pour chaque rencontre, taille et composition du groupe, comportement avant / pendant / après (déplacement, alimentation, repos, socialisation), type d'activité humaine (plaisance motorisée, pêche artisanale, activités d'observation…), nombre de bateaux, distance et vitesse d'approche, réaction (évitement, changement de comportement, durée des plongées). Complété par des entretiens avec les pêcheurs sur les interactions avec les filets.
+4. **Photo-identification** pour relier les observations à des groupes et suivre leur fidélité aux sites, en cohérence avec les méthodes utilisées en Iroise.
+5. **Lien avec la réglementation et la sensibilisation** : l'espèce est protégée (arrêté du 1^er^ juillet 2011, interdiction de perturbation intentionnelle), inscrite à l'annexe II de la directive Habitats, et le Parc est inclus dans le sanctuaire Pelagos. Les zones de chevauchement identifiées peuvent orienter la sensibilisation des usagers (code de bonne conduite d'approche).
+
+*Code, données nettoyées et couches SIG : **[À COMPLÉTER : lien GitHub]**. Analyse entièrement reproductible, réalisée sous R (sf, terra, ggplot2), QGIS et Quarto.*

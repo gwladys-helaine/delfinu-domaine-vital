@@ -1,0 +1,148 @@
+---
+title: "Le grand dauphin dans le Parc du Cap Corse et de l'Agriate"
+subtitle: "Domaine vital et trafic maritime : une analyse exploratoire pour préparer Delfinu"
+author: "Gwladys Helaine"
+date: today
+date-format: "MMMM YYYY"
+lang: fr
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    embed-resources: true
+    width: 1280
+    height: 720
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+res <- readRDS("outputs/resultats.rds")
+fmt <- function(x, d = 0) format(round(x, d), big.mark = " ", decimal.mark = ",", nsmall = d)
+dv  <- res$domaine_vital
+s50 <- dv[dv$niveau == "KDE 50 %", ]
+s95 <- dv[dv$niveau == "KDE 95 %", ]
+h_obs <- res$habitat_resume[res$habitat_resume$type == "Observations", ]
+h_dis <- res$habitat_resume[res$habitat_resume$type != "Observations", ]
+```
+
+## La question
+
+::: {.columns}
+::: {.column width="55%"}
+**Delfinu** : comprendre et réduire les pressions humaines sur les grands dauphins résidents du Cap Corse et d'Iroise.
+
+Première étape du projet : **étudier le domaine vital à partir des données existantes**.
+
+J'ai voulu voir ce qu'on peut déjà en dire avec des **données publiques**, et ce qui manque.
+:::
+::: {.column width="45%"}
+1. Où les dauphins sont-ils observés dans le Parc ?
+2. Dans quel habitat ?
+3. Ces zones se superposent-elles au trafic maritime ?
+:::
+:::
+
+::: notes
+Présenter en 30 secondes : je ne viens pas de la biologie marine académique, j'ai voulu montrer concrètement comment j'aborderais la première mission.
+:::
+
+## Données : de `r fmt(res$n_brut)` à `r fmt(res$n_parc)` observations
+
+```{r}
+knitr::kable(res$journal, col.names = c("Étape", "Restant"))
+```
+
+::: {.smaller}
+Sources : OBIS et GBIF (téléchargement sous R), bathymétrie NOAA, trafic EMODnet. Journal de nettoyage et dictionnaire de données fournis.
+:::
+
+::: notes
+Insister sur la bancarisation : doublons entre portails, échouages exclus, pseudo-réplication (un même groupe suivi plusieurs fois le même jour).
+:::
+
+## Méthode
+
+- **Domaine vital** : estimation par noyau (KDE), isoplèthes 50 % et 95 %, comparée à un MCP 95 %
+- **Habitat** : utilisation / disponibilité — observations contre points aléatoires dans le Parc
+- **Pressions** : densité de navires dans le cœur, le reste du domaine vital et le reste du Parc
+- **Outils** : R (sf, terra, ggplot2), QGIS, Quarto — tout est reproductible
+
+## Domaine vital
+
+::: {.columns}
+::: {.column width="58%"}
+![](outputs/figures/carte_domaine_vital.png)
+:::
+::: {.column width="42%"}
+- Cœur (50 %) : **`r fmt(s50$surface_km2)` km²** — `r fmt(s50$part_du_parc_pct, 1)` % du Parc
+- Domaine vital (95 %) : **`r fmt(s95$surface_km2)` km²** — `r fmt(s95$part_du_parc_pct, 1)` % du Parc
+- `r fmt(res$n_parc)` observations, `r res$annees[1]`–`r res$annees[2]`
+:::
+:::
+
+## Habitat
+
+![](outputs/figures/habitat_profondeur_cote.png){width=85%}
+
+Profondeur médiane : **`r fmt(h_obs$prof_mediane_m)` m** pour les observations, `r fmt(h_dis$prof_mediane_m)` m pour le milieu disponible.
+
+```{r}
+#| output: asis
+if (res$trafic_disponible) {
+  tr <- res$trafic[res$trafic$couche == unique(res$trafic$couche)[1], ]
+  cat("## Trafic maritime\n\n")
+  cat("::: {.columns}\n::: {.column width=\"55%\"}\n")
+  cat("![](outputs/figures/carte_trafic.png)\n:::\n")
+  cat("::: {.column width=\"45%\"}\n")
+  cat("Le domaine vital couvre **", fmt(tr$part_surface_dv_pct[1], 1),
+      " %** du Parc mais contient **", fmt(tr$part_fort_trafic_dans_dv_pct[1], 1),
+      " %** des zones de fort trafic.\n\n", sep = "")
+  cat("![](outputs/figures/trafic_par_zone.png)\n:::\n:::\n\n")
+}
+```
+
+## Ce que ces données ne disent pas
+
+- **Biais d'effort** : on voit les dauphins là où il y a des observateurs — souvent depuis des bateaux, ce qui gonfle le chevauchement avec le trafic
+- **Pas de photo-identification** : impossible de distinguer les groupes résidents
+- **Résolution** grossière pour une espèce côtière
+- **Hétérogénéité temporelle** des observations
+
+::: notes
+C'est le cœur du message : je sais ce que l'analyse permet et ne permet pas. Ces limites justifient exactement les actions prévues dans Delfinu.
+:::
+
+## Ce que je proposerais pour Delfinu
+
+1. **Base de données commune** avec Iroise (Darwin Core, compatible SINP)
+2. **Sorties à effort connu** (traces GPS) pour corriger le biais d'observation
+3. **Protocole d'interactions** : groupe, comportement avant / pendant / après, type d'activité, distance, nombre de bateaux, réaction
+4. **Entretiens avec les pêcheurs** sur les interactions avec les filets
+5. **Photo-identification** pour suivre les groupes résidents
+6. **Sensibilisation** des usagers dans les zones de chevauchement
+
+## Ce que j'apporte au projet
+
+::: {.columns}
+::: {.column width="50%"}
+**Analyse**
+
+- Données ouvertes, bancarisation, R, SIG
+- Méthode reproductible et critique
+:::
+::: {.column width="50%"}
+**Terrain et transmission**
+
+- *[À compléter : ton expérience de terrain]*
+- *[À compléter : vulgarisation, animation, publics]*
+- *[À compléter : travail avec des usagers, des acteurs locaux]*
+:::
+:::
+
+::: notes
+Faire le lien avec l'équipe de tournage et les acteurs locaux : montrer en quoi ton parcours prépare au contact avec les pêcheurs, les plaisanciers et le grand public.
+:::

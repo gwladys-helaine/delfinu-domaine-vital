@@ -1,0 +1,12 @@
+champ,type,unite,description
+source,texte,,"Portail d'origine (OBIS, GBIF, Complémentaire)"
+id_source,texte,,Identifiant de l'enregistrement dans la source
+longitude,réel,degrés (WGS84),Longitude de l'observation
+latitude,réel,degrés (WGS84),Latitude de l'observation
+date,date,AAAA-MM-JJ,Date de l'observation
+annee,entier,,Année de l'observation
+profondeur,réel,m (négatif en mer),Profondeur extraite de la bathymétrie au point
+incertitude_m,réel,m,Incertitude de localisation déclarée par la source
+type_obs,texte,,Type d'enregistrement (Darwin Core basisOfRecord)
+jeu_donnees,texte,,Nom du jeu de données d'origine
+effectif,réel,individus,Nombre d'individus déclaré (souvent non renseigné)
