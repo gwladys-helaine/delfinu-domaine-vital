@@ -18,10 +18,36 @@
 #
 #  Lancer depuis le dossier du projet (ouvrir delfinu-exercice.Rproj ou
 #  setwd() sur ce dossier), puis : source("analyse.R")
+#
+#  REPRODUCTIBILITÉ
+#   - Logiciels : analyse réalisée sous R 4.5 (Linux) ; les versions exactes de
+#     R et de chaque package sont enregistrées à chaque exécution dans
+#     outputs/session_info.txt et outputs/versions_packages.csv.
+#     Sous Linux, le package sf demande les bibliothèques système GDAL, GEOS et
+#     PROJ (paquets libgdal-dev, libgeos-dev, libproj-dev, libudunits2-dev).
+#   - Données : les observations OBIS/GBIF et la bathymétrie NOAA sont
+#     téléchargées au premier lancement puis conservées dans data/raw/ ; les
+#     lancements suivants réutilisent ces fichiers, ce qui garantit les mêmes
+#     résultats. La date du téléchargement est enregistrée dans
+#     outputs/sources_donnees.csv. Pour repartir de données à jour :
+#     FORCER_TELECHARGEMENT <- TRUE (les résultats peuvent alors changer, les
+#     portails étant alimentés en continu).
+#     Le périmètre du Parc (PatriNat, base des espaces protégés, 07/2026) et la
+#     densité de navires (EMODnet Human Activities, moyenne annuelle 2023) sont
+#     à déposer à la main dans data/raw/parc/ et data/raw/trafic/.
+#   - Hasard : le tirage des points de disponibilité est rendu reproductible
+#     par set.seed(2026).
+#   - Paramètres : tous les seuils et choix de méthode sont regroupés dans la
+#     section 0 ; les modifier permet de tester la sensibilité des résultats.
 # =============================================================================
 
 
 # ---- 0. Paramètres et packages ---------------------------------------------
+# Objectif : regrouper tous les choix de l'analyse (seuils de nettoyage,
+#            résolutions, réglages des méthodes) et charger les outils.
+# Pourquoi : un paramètre modifié ici se répercute partout ; on peut ainsi
+#            tester la sensibilité des résultats sans toucher au reste du code.
+# Sorties  : paramètres, packages chargés, dossiers du projet créés.
 
 ANNEE_MIN          <- 2000   # observations plus anciennes écartées
 INCERTITUDE_MAX_M  <- 5000   # précision de localisation minimale acceptée
@@ -82,6 +108,11 @@ resultats <- list(date_analyse = Sys.Date())
 
 
 # ---- 1. Périmètre d'étude ----------------------------------------------------
+# Objectif : lire le contour officiel du Parc (base PatriNat des espaces
+#            protégés) et définir l'emprise de téléchargement des données.
+# Méthode  : recherche automatique de la bonne couche et du bon polygone dans
+#            le GeoPackage ; emprise élargie au Parc + 0,15° de marge.
+# Sorties  : parc (polygone en Lambert-93), BBOX (emprise en WGS84).
 
 fichiers_parc <- list.files("data/raw/parc", pattern = "\\.(shp|gpkg|geojson)$",
                             full.names = TRUE, ignore.case = TRUE)
@@ -173,6 +204,12 @@ saveRDS(BBOX, fichier_emprise)
 
 
 # ---- 2. Bathymétrie et distance à la côte ------------------------------------
+# Objectif : décrire le milieu (profondeur, distance à la côte) sur toute la
+#            zone d'étude.
+# Méthode  : bathymétrie NOAA ETOPO 2022 (via marmap), reprojetée en Lambert-93 ;
+#            terre = altitude positive ; distance de chaque cellule de mer à la
+#            terre la plus proche.
+# Sorties  : bathy_l93, dist_cote (rasters), zone_etude (partie marine du Parc).
 
 # Une bathymétrie personnelle (GEBCO, EMODnet...) peut être déposée sous
 # data/raw/bathymetrie_perso.tif ; sinon on télécharge ETOPO 2022 via marmap.
@@ -242,6 +279,13 @@ resultats$surface_zone_km2 <- as.numeric(st_area(zone_etude)) / 1e6
 
 
 # ---- 3. Observations : téléchargement, bancarisation, nettoyage -------------
+# Objectif : constituer un jeu d'observations fiable et traçable.
+# Méthode  : téléchargement OBIS et GBIF, harmonisation des colonnes (Darwin
+#            Core), puis filtres successifs notés dans un journal : absences,
+#            spécimens, échouages, doublons entre portails, dates, précision,
+#            points à terre, agrégation à 1 observation par km² et par jour
+#            (pseudo-réplication), sélection dans le Parc.
+# Sorties  : obs_parc (observations retenues), journal (nombre restant par étape).
 
 wkt <- st_as_text(emprise_vers_sf(BBOX))
 fichier_brut <- "data/raw/observations_brutes.csv"
@@ -437,6 +481,12 @@ resultats$par_annee     <- count(st_drop_geometry(obs_parc), annee)
 
 
 # ---- 4. Domaine vital ----------------------------------------------------------
+# Objectif : estimer la zone utilisée habituellement par les grands dauphins.
+# Méthode  : estimation par noyau (KDE, largeur de bande de référence href),
+#            isoplèthes 50 % (cœur) et 95 % ; polygone convexe minimum (MCP 95 %)
+#            pour comparaison ; analyse de sensibilité avec une largeur de bande
+#            réduite de moitié.
+# Sorties  : domaine_vital (polygones), surfaces en km², kde_volume (raster).
 
 xy_parc <- st_coordinates(obs_parc)
 
@@ -534,6 +584,11 @@ message("Sensibilité (h x ", FACTEUR_SENSIBILITE, ") : cœur = ",
 
 
 # ---- 5. Habitat : utilisation vs disponibilité -----------------------------
+# Objectif : tester si les zones fréquentées diffèrent du milieu disponible.
+# Méthode  : comparaison des observations à des points tirés au hasard dans le
+#            Parc (plan utilisation / disponibilité) ; tests de Wilcoxon ;
+#            corrélation de Spearman puis régression logistique.
+# Sorties  : hab (tableau utilisation / disponibilité), tests, rapport de cotes.
 
 # Points de "disponibilité" tirés au hasard dans la mer du Parc
 dispo <- st_sf(geometry = st_sample(zone_etude, size = N_DISPO_PAR_OBS * n_parc,
@@ -583,6 +638,12 @@ resultats$glm <- data.frame(
 
 
 # ---- 6. Pressions : trafic maritime -----------------------------------------
+# Objectif : mesurer le chevauchement entre le domaine vital et le trafic.
+# Méthode  : densité de navires EMODnet (AIS, h/km²/mois) comparée entre le cœur,
+#            l'anneau 50-95 % et le reste du Parc (médianes) ; part des cellules
+#            de fort trafic (3e quartile, puis 50 % et 10 % en sensibilité)
+#            situées dans le domaine vital.
+# Sorties  : resultats$trafic (tableau par zone et par catégorie de navires).
 
 fichiers_trafic <- list.files("data/raw/trafic", pattern = "\\.tif$",
                               full.names = TRUE, ignore.case = TRUE)
@@ -663,6 +724,10 @@ if (resultats$trafic_disponible) {
 
 
 # ---- 7. Cartes et figures ----------------------------------------------------
+# Objectif : produire des cartes et graphiques prêts à diffuser.
+# Méthode  : ggplot2 ; habillage cartographique commun (échelle, nord
+#            géographique, repères, sources et auteur en légende).
+# Sorties  : outputs/figures/ (carte du domaine vital, habitat, trafic).
 
 AUTEUR <- "G. Helaine"
 mois_fr <- c("janvier", "février", "mars", "avril", "mai", "juin", "juillet",
@@ -931,6 +996,11 @@ if (resultats$trafic_disponible) {
 
 
 # ---- 8. Exports ----------------------------------------------------------------
+# Objectif : rendre l'analyse vérifiable et réutilisable.
+# Sorties  : données nettoyées, journal et dictionnaire (data/propre/) ;
+#            couches SIG pour QGIS (outputs/sig/) ; tableaux de résultats
+#            (outputs/tableaux/) ; résultats pour la note (outputs/resultats.rds) ;
+#            versions des logiciels et dates des données sources (outputs/).
 
 # 8a. Données propres + dictionnaire + journal de nettoyage
 obs_export <- st_drop_geometry(obs_parc) |>
@@ -985,6 +1055,25 @@ if (resultats$trafic_disponible) {
 # 8d. Résultats pour la note et la présentation
 saveRDS(resultats, "outputs/resultats.rds")
 writeLines(capture.output(sessionInfo()), "outputs/session_info.txt")
+
+# Versions exactes de R et des packages utilisés
+versions <- data.frame(
+  logiciel = c("R", paquets),
+  version  = c(paste(R.version$major, R.version$minor, sep = "."),
+               vapply(paquets, function(p) tryCatch(as.character(packageVersion(p)),
+                                                    error = function(e) NA_character_),
+                      character(1)))
+)
+readr::write_csv(versions, "outputs/versions_packages.csv")
+
+# Traçabilité des données sources : fichier, date de téléchargement, taille
+fichiers_sources <- list.files("data/raw", recursive = TRUE, full.names = TRUE)
+sources <- data.frame(
+  fichier = fichiers_sources,
+  date_fichier = format(file.info(fichiers_sources)$mtime, "%Y-%m-%d %H:%M"),
+  taille_Mo = round(file.info(fichiers_sources)$size / 1e6, 2)
+)
+readr::write_csv(sources, "outputs/sources_donnees.csv")
 
 message("\nTerminé. Résultats dans outputs/ — lance ensuite le rendu de note.qmd et presentation.qmd.")
 print(resultats$journal)

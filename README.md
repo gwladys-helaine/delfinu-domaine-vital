@@ -4,7 +4,7 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 
 **Auteure :** Gwladys Helaine — octobre 2026
 
-**À lire en premier :** [`note.pdf`](note.pdf), la note de synthèse (méthodes, résultats, limites, conclusion).
+**À lire en premier :** [`note.pdf`](note.pdf), la note de synthèse jointe à la candidature, conservée telle qu'envoyée. Les limites identifiées depuis sont indiquées plus bas, dans la section [Retour critique](#retour-critique-octobre-2026).
 
 <p align="center">
   <img src="carte_domaine_vital.png" width="49%" alt="Domaine vital estimé du grand dauphin">
@@ -12,7 +12,7 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 </p>
 <p align="center"><em>À gauche : domaine vital estimé (isoplèthes 50 % et 95 %). À droite : densité de navires (AIS, 2023) et domaine vital.</em></p>
 
-## Principaux résultats
+## Principaux résultats (version jointe à la candidature)
 
 - 1 329 enregistrements bruts (OBIS, GBIF) → **161 observations** retenues dans le Parc après nettoyage (échouages, doublons, localisations imprécises, points à terre).
 - Cœur du domaine vital (noyau 50 %) : **136 km²**, dans le golfe de Saint-Florent ; domaine vital (noyau 95 %) : **1 165 km²**.
@@ -21,12 +21,21 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 - Densité médiane de navires (AIS) **2,0 fois** plus élevée dans le cœur du domaine vital que dans le reste du Parc, et **3,3 fois** pour la plaisance ; la surreprésentation des zones de fort trafic dans le domaine vital se maintient quel que soit le seuil testé.
 - Limites principales : 78 % des observations proviennent d'une seule base opportuniste (la répartition reflète aussi l'effort d'observation), et 83 % datent de 2001 à 2010 alors que le trafic date de 2023. Les résultats illustrent une méthode plus qu'ils ne décrivent la situation actuelle.
 
+## Retour critique (octobre 2026)
+
+Depuis l'envoi de cette candidature, j'ai repris la démarche pour le Parc naturel marin d'Iroise ([delfinu-iroise](https://github.com/gwladys-helaine/delfinu-iroise)). Cette deuxième application m'a permis d'identifier plusieurs limites de la présente version :
+
+- **Trafic** : la comparaison ne tient pas compte de la proximité de la côte. Le cœur estimé se trouve dans le golfe de Saint-Florent, près d'un port, et l'écart observé avec le reste du Parc peut en partie venir de là. En Iroise, une fois ce contrôle fait, l'écart s'inversait pour la plaisance et la voile ; il n'a pas été vérifié ici.
+- **Habitat** : la comparaison avec le milieu disponible ne tient pas compte de l'effort d'observation, lui-même surtout côtier. Le caractère côtier des observations ne suffit donc pas à conclure à une préférence des dauphins.
+- **Vocabulaire** : pour des observations opportunistes, sans suivi d'individus, le terme « domaine vital » est trop fort ; « zones de concentration des observations » serait plus juste.
+- **Contrôle qualité** : les données n'ont pas été examinées pour d'éventuelles positions ramenées au centre de mailles d'atlas ou des doublons aux coordonnées dégradées, deux défauts rencontrés dans les données de l'Iroise.
+
 ## Contenu du dépôt
 
 | Fichier | Rôle |
 |---|---|
 | `analyse.R` | Script complet : téléchargement, nettoyage, domaine vital, habitat, pressions, figures, exports |
-| `note.qmd` / `note.pdf` | Note de synthèse (source Quarto et version PDF) |
+| `note.qmd` / `note.pdf` | Note de synthèse jointe à la candidature (source Quarto et version PDF) |
 | `presentation.qmd` | Présentation (reveal.js) |
 | `carte_domaine_vital.png`, `carte_trafic.png` | Cartes |
 | `habitat_profondeur_cote.png`, `trafic_par_zone.png` | Graphiques |
@@ -44,6 +53,8 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 3. Lancer `source("analyse.R")` : le script télécharge les observations et la bathymétrie, puis recrée tous les dossiers et résultats (`data/propre/`, `outputs/`).
 4. Rendre `note.qmd` et `presentation.qmd` avec Quarto.
 
+Les données téléchargées sont conservées dans `data/raw/` : un nouveau lancement réutilise exactement les mêmes données. Les versions de R et des packages, ainsi que la date de chaque fichier source, sont enregistrées dans `outputs/session_info.txt`, `outputs/versions_packages.csv` et `outputs/sources_donnees.csv`. Les portails OBIS et GBIF étant alimentés en continu, un nouveau téléchargement peut donner des résultats légèrement différents.
+
 ## Sources de données
 
 - Observations : OBIS, GBIF (dont base OGREVA de la DREAL Corse, Observatoire Pelagis, GIS3M, Tethys Research Institute)
@@ -54,3 +65,9 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 ## Méthodes
 
 Estimation du domaine vital par noyau (isoplèthes 50 % et 95 %, largeur de bande href) et polygone convexe minimum, avec analyse de sensibilité à la largeur de bande ; comparaison utilisation / disponibilité de l'habitat (tests de Wilcoxon, régression logistique) ; comparaison de la densité de navires entre zones du domaine vital, avec test de sensibilité au seuil de fort trafic. Outils : R (sf, terra, dplyr, ggplot2), QGIS, Quarto.
+
+## Licence et utilisation des données
+
+Le code est librement réutilisable. Les observations restent soumises à la licence de leur jeu de données d'origine, indiquée sur OBIS et GBIF ; toute réutilisation doit citer ces jeux.
+
+*Le code a été écrit avec l'aide d'un assistant d'IA. J'ai conduit la démarche, contrôlé les données et les résultats, et arbitré les choix de méthode et d'interprétation.*
