@@ -3,7 +3,7 @@
 #  marin du Cap Corse et de l'Agriate et chevauchement avec le trafic maritime
 #
 #  Analyse exploratoire à partir de données ouvertes
-#  Auteur : Gwladys Helaine — octobre 2026
+#  Auteure : Gwladys Helaine — octobre 2026
 #
 #  Étapes :
 #   0. Paramètres et packages
@@ -400,8 +400,8 @@ if (file.exists(fichier_compl)) {
 }
 
 if (is.null(obs_brutes) || nrow(obs_brutes) == 0) {
-  stop("Aucune observation récupérée. Vérifie la connexion internet ",
-       "ou dépose un fichier data/raw/observations_complementaires.csv.")
+  stop("Aucune observation récupérée. Vérifier la connexion internet ",
+       "ou déposer un fichier data/raw/observations_complementaires.csv.")
 }
 
 # -- Nettoyage, avec un journal de chaque étape (traçabilité)
@@ -1030,7 +1030,7 @@ readr::write_csv(dictionnaire, "data/propre/dictionnaire_donnees.csv")
 
 # 8b. Couches SIG pour QGIS (un seul GeoPackage + rasters)
 gpkg <- "outputs/sig/delfinu_exercice.gpkg"
-# Supprimer l'ancien GeoPackage ET ses fichiers annexes SQLite (-wal, -shm, -journal)
+# Supprimer l'ancien GeoPackage et ses fichiers annexes SQLite (-wal, -shm, -journal)
 unlink(list.files("outputs/sig", pattern = "^delfinu_exercice\\.gpkg", full.names = TRUE))
 st_write(zone_etude, gpkg, layer = "zone_etude", quiet = TRUE)
 st_write(obs_parc[, c("source", "date", "annee", "profondeur", "jeu_donnees")],
@@ -1052,7 +1052,7 @@ if (resultats$trafic_disponible) {
   readr::write_csv(resultats$trafic, "outputs/tableaux/trafic_par_zone.csv")
 }
 
-# 8d. Résultats pour la note et la présentation
+# 8d. Résultats pour la note
 saveRDS(resultats, "outputs/resultats.rds")
 writeLines(capture.output(sessionInfo()), "outputs/session_info.txt")
 
@@ -1075,6 +1075,6 @@ sources <- data.frame(
 )
 readr::write_csv(sources, "outputs/sources_donnees.csv")
 
-message("\nTerminé. Résultats dans outputs/ — lance ensuite le rendu de note.qmd et presentation.qmd.")
+message("\nTerminé. Résultats dans outputs/ — lancer ensuite le rendu de note.qmd.")
 print(resultats$journal)
 print(resultats$domaine_vital)

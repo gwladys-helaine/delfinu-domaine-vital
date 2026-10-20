@@ -25,8 +25,8 @@ Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand 
 
 Depuis l'envoi de cette candidature, j'ai repris la démarche pour le Parc naturel marin d'Iroise ([delfinu-iroise](https://github.com/gwladys-helaine/delfinu-iroise)). Cette deuxième application m'a permis d'identifier plusieurs limites de la présente version :
 
-- **Trafic** : la comparaison ne tient pas compte de la proximité de la côte. Le cœur estimé se trouve dans le golfe de Saint-Florent, près d'un port, et l'écart observé avec le reste du Parc peut en partie venir de là. En Iroise, une fois ce contrôle fait, l'écart s'inversait pour la plaisance et la voile ; il n'a pas été vérifié ici.
-- **Habitat** : la comparaison avec le milieu disponible ne tient pas compte de l'effort d'observation, lui-même surtout côtier. Le caractère côtier des observations ne suffit donc pas à conclure à une préférence des dauphins.
+- **Trafic** : la comparaison oppose des eaux côtières (le cœur estimé, dans le golfe de Saint-Florent, près d'un port) à un reste du Parc majoritairement au large. L'écart observé peut donc tenir en partie à la seule proximité de la côte, biais que le test de sensibilité au seuil ne permet pas d'écarter. En Iroise, une comparaison à distance de la côte équivalente inversait l'écart pour la plaisance et la voile ; ce contrôle n'a pas été fait ici.
+- **Habitat** : le biais d'effort d'observation est signalé dans les limites de la note, mais il n'est pas pris en compte dans la comparaison avec le milieu disponible. Le caractère côtier des observations ne permet donc pas, à lui seul, de conclure à une préférence des dauphins.
 - **Vocabulaire** : pour des observations opportunistes, sans suivi d'individus, le terme « domaine vital » est trop fort ; « zones de concentration des observations » serait plus juste.
 - **Contrôle qualité** : les données n'ont pas été examinées pour d'éventuelles positions ramenées au centre de mailles d'atlas ou des doublons aux coordonnées dégradées, deux défauts rencontrés dans les données de l'Iroise.
 
@@ -36,7 +36,6 @@ Depuis l'envoi de cette candidature, j'ai repris la démarche pour le Parc natur
 |---|---|
 | `analyse.R` | Script complet : téléchargement, nettoyage, domaine vital, habitat, pressions, figures, exports |
 | `note.qmd` / `note.pdf` | Note de synthèse jointe à la candidature (source Quarto et version PDF) |
-| `presentation.qmd` | Présentation (reveal.js) |
 | `carte_domaine_vital.png`, `carte_trafic.png` | Cartes |
 | `habitat_profondeur_cote.png`, `trafic_par_zone.png` | Graphiques |
 | `observations_propres_parc.csv` | Observations nettoyées (161) |
@@ -51,7 +50,7 @@ Depuis l'envoi de cette candidature, j'ai repris la démarche pour le Parc natur
 1. Ouvrir `delfinu-exercice.Rproj` dans RStudio.
 2. Déposer le périmètre du Parc (`sig_metrop.gpkg`, base des espaces protégés de PatriNat) dans `data/raw/parc/` et, en option, les rasters de densité de navires EMODnet dans `data/raw/trafic/`.
 3. Lancer `source("analyse.R")` : le script télécharge les observations et la bathymétrie, puis recrée tous les dossiers et résultats (`data/propre/`, `outputs/`).
-4. Rendre `note.qmd` et `presentation.qmd` avec Quarto.
+4. Rendre `note.qmd` avec Quarto.
 
 Les données téléchargées sont conservées dans `data/raw/` : un nouveau lancement réutilise exactement les mêmes données. Les versions de R et des packages, ainsi que la date de chaque fichier source, sont enregistrées dans `outputs/session_info.txt`, `outputs/versions_packages.csv` et `outputs/sources_donnees.csv`. Les portails OBIS et GBIF étant alimentés en continu, un nouveau téléchargement peut donner des résultats légèrement différents.
 
