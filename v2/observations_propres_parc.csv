@@ -1,0 +1,162 @@
+source,id_source,longitude,latitude,date,annee,profondeur,incertitude_m,type_obs,jeu_donnees,effectif
+OBIS,03d0957c-634b-4199-9c28-9647bd873237,8.511578,43.050093,2019-02-18,2019,-2631.5087890625,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,26df368b-a9f5-41c2-8fd5-b079906bc8fb,8.92377,42.80871,2012-08-03,2012,-1113.63525390625,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,277f5ba7-0895-4526-a151-170787b5886b,9.29615,42.699797,2009-01-28,2009,-28.541276931762695,NA,HUMAN_OBSERVATION,Tethys Research Institute aerial survey cetacean sightings 2009-2011,1
+OBIS,3eae0ffd-b9aa-4a8a-9b3d-f69333f9f30d,9.095881,42.765114,2007-07-14,2007,-82.44996643066406,NA,HUMAN_OBSERVATION,Tethys Research Institute shipboard survey cetacean sightings 1986-2012,11
+OBIS,48d3fe33-2a22-4d63-937c-05cec93dd04e,8.62825,42.99598,2012-05-22,2012,-2606.42626953125,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,504b58f9-fabb-42e4-a1e7-e2a5bf7863cd,9.127472,42.7581,2012-08-02,2012,-43.652740478515625,NA,HUMAN_OBSERVATION,Tethys Research Institute shipboard survey cetacean sightings 1986-2012,9
+OBIS,510212ea-f8b4-418b-8851-4b56cdb18507,9.595633,42.7605,2013-10-19,2013,-400.8321533203125,NA,HUMAN_OBSERVATION,Cetacean coordinated transborder monitoring using ferries as platforms of observation off Tunisia 2013-2014 - Atutax,2
+OBIS,55702a2a-d4dd-44c3-89f4-c5afbb45fa79,9.0167,42.6508,2005-09-01,2005,-30.42995834350586,NA,HUMAN_OBSERVATION,"CE.TU.S. research cetacean sightings in the North Tuscany and Tuscan Archipelago waters, 1997-2011",3
+OBIS,6532fa40-81a2-4547-8474-f25e2f147b60,9.028229,42.78339,2007-07-14,2007,-514.0584716796875,NA,HUMAN_OBSERVATION,Tethys Research Institute shipboard survey cetacean sightings 1986-2012,10
+OBIS,6c6b65fa-3500-4291-bf9e-fc3eb7816215,9.318027,42.954884,2010-06-25,2010,-99.97240447998047,NA,HUMAN_OBSERVATION,Tethys Research Institute aerial survey cetacean sightings 2009-2011,1
+OBIS,7c26c507-0cbe-4900-9bb4-d48d29404054,8.91278,42.796,2012-08-03,2012,-1064.473876953125,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,8145a299-aae1-4c1c-aae1-73fa8c940c6d,9.03059,42.72224,2012-08-03,2012,-73.4239501953125,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,85c023ad-8393-4647-b035-67d689cb9008,8.603743,42.972173,2019-02-18,2019,-2617.451416015625,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,91c46b66-ac98-4bd5-be18-be93a1d6f715,8.9214,42.80672,2012-08-03,2012,-1097.9287109375,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,98d70c2d-3699-44c7-bebe-10e9a5952624,9.52971,42.99157,2012-01-21,2012,-57.83797836303711,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,a289896c-bebc-4fcb-94f6-f9fb14a3c869,9.11135,42.7508,2012-08-02,2012,-46.58698654174805,NA,HUMAN_OBSERVATION,Tethys Research Institute shipboard survey cetacean sightings 1986-2012,9
+OBIS,a385e3b0-cce2-4acc-a8e2-9ffc18b7a6fc,9.1899,42.74316,2001-05-29,2001,-40.540958404541016,NA,HUMAN_OBSERVATION,Tethys Research Institute shipboard survey cetacean sightings 1986-2012,5
+OBIS,b5758750-f740-4aca-b4bb-84d4916281be,9.00463,42.72268,2012-08-03,2012,-284.69940185546875,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,bcd7f112-4a4a-4420-9edf-f0726b7e2328,9.31631,42.81232,2012-05-27,2012,-45.966487884521484,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,c0b73f06-1c41-4111-a819-b2d2c6647f03,8.91597,42.79787,2012-08-03,2012,-1054.701171875,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,e0c14b81-6c75-454f-8d02-cbf513a9bd96,9.28731,42.76961,2012-02-09,2012,-651.443603515625,NA,HUMAN_OBSERVATION,Observatoire Pelagis aerial surveys 2002-2021,NA
+OBIS,e25da413-1421-43a7-89fb-244bdfbf7741,8.995818,42.66663,2012-08-02,2012,-115.94378662109375,NA,HUMAN_OBSERVATION,Tethys Research Institute shipboard survey cetacean sightings 1986-2012,2
+OBIS,e96a9477-236c-4cc2-bb47-95502f9da1f9,9.5799,42.904867,2013-11-02,2013,-340.762939453125,NA,HUMAN_OBSERVATION,Cetacean coordinated transborder monitoring using ferries as platforms of observation off Tunisia 2013-2014 - Atutax,6
+GBIF,2473977922,9.32008,43.02874,2014-04-25,2014,-92.6719741821289,5000,HUMAN_OBSERVATION,Données du Groupement d’Intérêt Scientifique pour les Mammifères Marins de Méditerranée et leur environnement (GIS3M) - Observation Cétacés du projet Grand Dauphin Étude et Gestion en Méditerranée,NA
+GBIF,2473976924,9.30054,42.84945,2014-05-08,2014,-82.50555419921875,5000,HUMAN_OBSERVATION,Données du Groupement d’Intérêt Scientifique pour les Mammifères Marins de Méditerranée et leur environnement (GIS3M) - Observation Cétacés du projet Grand Dauphin Étude et Gestion en Méditerranée,NA
+GBIF,2473977947,9.30054,42.84945,2014-08-10,2014,-82.50555419921875,5000,HUMAN_OBSERVATION,Données du Groupement d’Intérêt Scientifique pour les Mammifères Marins de Méditerranée et leur environnement (GIS3M) - Observation Cétacés du projet Grand Dauphin Étude et Gestion en Méditerranée,NA
+GBIF,2473977925,9.29081,42.75982,2014-10-14,2014,-544.6905517578125,5000,HUMAN_OBSERVATION,Données du Groupement d’Intérêt Scientifique pour les Mammifères Marins de Méditerranée et leur environnement (GIS3M) - Observation Cétacés du projet Grand Dauphin Étude et Gestion en Méditerranée,NA
+GBIF,2473979927,9.29081,42.75982,2014-10-19,2014,-544.6905517578125,5000,HUMAN_OBSERVATION,Données du Groupement d’Intérêt Scientifique pour les Mammifères Marins de Méditerranée et leur environnement (GIS3M) - Observation Cétacés du projet Grand Dauphin Étude et Gestion en Méditerranée,NA
+GBIF,2473977927,9.16916,42.7669,2014-12-13,2014,-59.41648483276367,5000,HUMAN_OBSERVATION,Données du Groupement d’Intérêt Scientifique pour les Mammifères Marins de Méditerranée et leur environnement (GIS3M) - Observation Cétacés du projet Grand Dauphin Étude et Gestion en Méditerranée,NA
+GBIF,2470460584,8.34159,43.08182,2013-07-30,2013,-2613.242431640625,5000,HUMAN_OBSERVATION,CardObs : Observations naturalistes issues de l'outil CardObs-Données naturalistes de François BRETON,NA
+GBIF,2473976917,9.3103,42.93909,2013-07-07,2013,-491.15655517578125,5000,HUMAN_OBSERVATION,Données du Groupement d’Intérêt Scientifique pour les Mammifères Marins de Méditerranée et leur environnement (GIS3M) - Observation Cétacés du projet Grand Dauphin Étude et Gestion en Méditerranée,NA
+GBIF,2473978915,9.29081,42.75982,2013-07-20,2013,-544.6905517578125,5000,HUMAN_OBSERVATION,Données du Groupement d’Intérêt Scientifique pour les Mammifères Marins de Méditerranée et leur environnement (GIS3M) - Observation Cétacés du projet Grand Dauphin Étude et Gestion en Méditerranée,NA
+GBIF,2488275063,9.32088,42.78073,2011-06-03,2011,-89.67494201660156,50,HUMAN_OBSERVATION,Programme CARTHAM: Inventaire biologique dans le cadre de Natura 2000 en Mer,NA
+GBIF,2478577958,9.27777,42.70732,2007-03-17,2007,-46.493736267089844,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579671,9.25713,42.73312,2007-03-17,2007,-60.085296630859375,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478581065,9.2668,42.72415,2007-03-17,2007,-58.520118713378906,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478581316,9.19776,42.77674,2007-03-17,2007,-60.18865966796875,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478582295,9.15551,42.79121,2007-03-17,2007,-141.6077880859375,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478613399,9.29038,42.69457,2007-03-17,2007,-24.67445182800293,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478613401,9.28185,42.70507,2007-03-17,2007,-42.29354476928711,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478613797,9.2531,42.74904,2007-03-17,2007,-91.25233459472656,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478614531,9.18907,42.79021,2007-03-17,2007,-85.688995361328125,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478635247,9.23671,42.7572,2007-03-17,2007,-199.38519287109375,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478657506,9.28724,42.69996,2007-03-17,2007,-33.73360061645508,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478658890,9.21096,42.76515,2007-03-17,2007,-217.29296875,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478658918,9.22341,42.75012,2007-03-17,2007,-73.2596435546875,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478681803,9.16382,42.78501,2007-03-17,2007,-76.559478759765625,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478690906,9.14593,42.78181,2007-03-17,2007,-133.5323028564453,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478801659,9.24827,42.74198,2007-03-17,2007,-50.69389343261719,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478578662,9.14649,42.77396,2007-04-18,2007,-54.192874908447266,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579675,9.15519,42.76757,2007-04-18,2007,-46.087528228759766,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478580666,9.16674,42.75229,2007-04-18,2007,-43.5530891418457,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478581493,9.16043,42.78737,2007-04-18,2007,-104.51741027832031,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478581672,9.17696,42.78777,2007-04-18,2007,-60.885501861572266,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478609561,9.14346,42.77096,2007-04-18,2007,-52.096473693847656,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478610534,9.1889,42.75576,2007-04-18,2007,-56.867698669433594,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478612491,9.20238,42.75693,2007-04-18,2007,-86.9792709350586,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478637959,9.17232,42.78171,2007-04-18,2007,-58.07184982299805,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478638592,9.16824,42.75779,2007-04-18,2007,-49.325557708740234,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478657360,9.15643,42.76007,2007-04-18,2007,-41.839717864990234,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478691372,9.14866,42.78207,2007-04-18,2007,-130.9963836669922,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478718511,9.13755,42.76618,2007-04-18,2007,-48.99582290649414,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478736499,9.19127,42.80007,2007-04-18,2007,-333.08758544921875,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478756010,9.17929,42.75799,2007-04-18,2007,-56.019046783447266,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478578512,9.27089,42.71932,2006-01-21,2006,-59.980228424072266,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579000,9.25911,42.72046,2006-01-21,2006,-20.558990478515625,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478609284,9.27321,42.71357,2006-01-21,2006,-49.336246490478516,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478661208,9.27911,42.70273,2006-01-21,2006,-33.04661560058594,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478682486,9.33461,42.75604,2006-01-21,2006,-29.98764419555664,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478716504,9.28711,42.69732,2006-01-21,2006,-30.964265823364258,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478716716,9.29566,42.69238,2006-01-21,2006,-16.643827438354492,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478737424,9.33116,42.76865,2006-01-21,2006,-54.96004867553711,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478742131,9.32341,42.72493,2006-01-21,2006,-12.557153701782227,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478752537,9.30527,42.68713,2006-01-21,2006,-1.8782360553741455,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478755765,9.31741,42.73765,2006-01-21,2006,-90.729949951171875,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478806574,9.3034,42.72604,2006-01-21,2006,-87.17364501953125,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478808500,9.30796,42.69085,2006-01-21,2006,-4.268211364746094,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478578346,9.32066,42.79065,2006-04-01,2006,-219.1769561767578,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579283,9.30272,42.70349,2006-04-08,2006,-25.63789939880371,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478580004,9.25143,42.73143,2006-04-08,2006,-43.52407455444336,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478582036,9.26611,42.7204,2006-04-08,2006,-47.90751647949219,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478609588,9.31375,42.74043,2006-04-08,2006,-134.36447143554688,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478610105,9.31907,42.78223,2006-04-01,2006,-95.35308837890625,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478610479,9.29099,42.70677,2006-04-08,2006,-41.35395431518555,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478612436,9.33108,42.76182,2006-04-08,2006,-46.86279296875,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478613392,9.23041,42.7457,2006-04-08,2006,-58.487022399902344,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478614476,9.30352,42.70818,2006-04-08,2006,-21.192556381225586,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478633206,9.33086,42.75407,2006-04-08,2006,-62.2590446472168,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478638472,9.23313,42.73599,2006-04-08,2006,-38.81621170043945,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478639401,9.3173,42.81126,2006-04-01,2006,-56.504451751708984,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478682487,9.29194,42.69771,2006-04-08,2006,-29.208106994628906,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478692211,9.32413,42.76446,2006-04-08,2006,-70.55297088623047,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478692455,9.31936,42.80207,2006-04-01,2006,-71.47982025146484,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478711392,9.2821,42.70265,2006-04-08,2006,-38.2570686340332,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478750209,9.25224,42.73998,2006-04-08,2006,-59.28788757324219,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478757596,9.32043,42.73409,2006-04-08,2006,-62.59394836425781,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478784751,9.26586,42.72615,2006-04-08,2006,-70.33746337890625,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478785136,9.32127,42.80365,2006-04-01,2006,-43.8106689453125,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478809485,9.27738,42.71415,2006-04-08,2006,-62.61903762817383,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478577808,9.20855,42.74973,2006-08-19,2006,-48.790771484375,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579984,9.14754,42.76757,2006-08-19,2006,-45.16492462158203,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478580681,9.1876,42.75101,2006-08-19,2006,-54.087398529052734,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478609800,9.15746,42.76129,2006-08-19,2006,-43.56589889526367,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478635015,9.1727900000000009,42.75301,2006-08-19,2006,-47.447731018066406,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478659819,9.19765,42.75798,2006-08-19,2006,-58.38473892211914,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478710972,9.15543,42.77351,2006-08-19,2006,-52.55802917480469,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579494,9.24322,42.75173,2005-01-12,2005,-104.90614318847656,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579723,9.2385,42.75507,2005-01-08,2005,-146.05645751953125,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478638802,9.24154,42.75146,2005-01-08,2005,-104.90614318847656,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478656683,9.25433,42.75034,2005-01-12,2005,-91.25233459472656,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478686601,9.25516,42.7534,2005-01-12,2005,-96.8951644897461,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478727589,9.24183,42.73812,2005-01-08,2005,-48.52392578125,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478750591,9.23793,42.7534,2005-01-08,2005,-107.87928009033203,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478784217,9.24905,42.75396,2005-01-12,2005,-110.79434967041016,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478802355,9.2496,42.7434,2005-01-12,2005,-55.251617431640625,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478580018,9.20793,42.7734,2005-03-16,2005,-68.98773956298828,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478716547,9.23322,42.75395,2005-03-16,2005,-135.14349365234375,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478736297,9.21405,42.74118,2005-03-16,2005,-27.860097885131836,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478808554,9.20098,42.78007,2005-03-16,2005,-77.94721984863281,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478581562,9.33405,42.80034,2005-05-01,2005,-24.074514389038086,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478633385,9.31765,42.9134,2005-05-16,2005,-91.654815673828125,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478657592,9.32099,42.90784,2005-05-16,2005,-55.5235481262207,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478577698,9.10237,42.75052,2005-09-24,2005,-50.26529312133789,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478610491,9.15782,42.77242,2005-09-24,2005,-53.980133056640625,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478635211,9.1146,42.74971,2005-09-24,2005,-45.89287185668945,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478639600,9.13513,42.76659,2005-09-24,2005,-48.685035705566406,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478660300,9.11533,42.7629,2005-09-24,2005,-55.083858489990234,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478751621,9.11404,42.75576,2005-09-24,2005,-48.20771789550781,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478755449,9.15551,42.76065,2005-09-24,2005,-41.05462646484375,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478756739,9.09141,42.75006,2005-09-24,2005,-51.08606719970703,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478774697,9.12751,42.76745,2005-09-24,2005,-51.95100402832031,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478613479,9.18255,42.7684,2005-10-30,2005,-65.15660858154297,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478633199,9.17516,42.76673,2005-10-30,2005,-61.336158752441406,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478638757,9.16627,42.76804,2005-10-30,2005,-57.21080017089844,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478691385,9.17108,42.78179,2005-10-30,2005,-58.07184982299805,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478692194,9.16882,42.78246,2005-10-30,2005,-60.598716735839844,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478750548,9.17379,42.79099,2005-10-30,2005,-62.52092361450195,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579265,9.22822,42.73646,2004-05-22,2004,-29.19264030456543,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478710814,9.21071,42.74146,2004-05-22,2004,-26.309246063232422,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478771371,9.18015,42.74451,2004-05-22,2004,-40.07115173339844,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478577947,9.2871,42.75118,2004-06-23,2004,-259.8158874511719,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478580269,9.19821,42.77702,2004-06-23,2004,-60.18865966796875,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478580872,9.14099,42.77368,2004-06-23,2004,-54.10779571533203,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478580980,9.15627,42.77923,2004-06-23,2004,-73.0348892211914,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478580981,9.17598,42.77868,2004-06-23,2004,-56.57585906982422,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478610599,9.22099,42.76923,2004-06-23,2004,-227.87106323242188,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478637850,9.11932,42.7684,2004-06-23,2004,-61.622711181640625,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478716968,9.13127,42.77173,2004-06-23,2004,-52.52909469604492,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478633303,9.30405,42.85507,2004-07-17,2004,-96.9493179321289,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478638957,9.29433,42.88396,2004-07-17,2004,-183.1867218017578,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478657126,9.30293,42.87285,2004-07-17,2004,-97.04444122314453,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478750446,9.29682,42.86757,2004-07-17,2004,-256.05010986328125,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478807842,9.19932,42.74757,2004-08-16,2004,-50.31366729736328,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579246,9.22904,42.76951,2004-09-02,2004,-366.1439208984375,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478579720,9.18905,42.77674,2004-09-02,2004,-61.307151794433594,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478580951,9.24015,42.76423,2004-09-02,2004,-375.99688720703125,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478614590,9.19599,42.77645,2004-09-02,2004,-59.60140609741211,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478632639,9.21266,42.77618,2004-09-02,2004,-109.50633239746094,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,2478635131,9.25877,42.76424,2004-09-02,2004,-356.19403076171875,NA,HUMAN_OBSERVATION,Données opportunistes capitalisées par la DREAL Corse (OGREVA) - Dreal Corse - Base Ogreva,NA
+GBIF,3472771442,9.29081,42.75982,2006-06-30,2006,-544.6905517578125,5000,HUMAN_OBSERVATION,Inventaire des Mammifères de France - Inventaire des Mammifères marins de France (métropole et outre-mer),NA
+GBIF,3472773972,9.16916,42.7669,2013-07-20,2013,-59.41648483276367,5000,HUMAN_OBSERVATION,Inventaire des Mammifères de France - Inventaire des Mammifères marins de France (métropole et outre-mer),NA

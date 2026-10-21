@@ -1,0 +1,329 @@
+---
+title: "Zones de concentration des observations de grand dauphin dans le Parc naturel marin du Cap Corse et de l'Agriate et chevauchement avec le trafic maritime"
+subtitle: "Version révisée d'un exercice personnel d'analyse de données ouvertes, réalisé dans le cadre d'une candidature au projet Delfinu"
+author-meta: "Gwladys Helaine"
+lang: fr
+crossref:
+  tbl-title: "Tableau"
+  tbl-prefix: "Tableau"
+format:
+  html:
+    embed-resources: true
+    toc: false
+    theme: cosmo
+    fontsize: 0.95em
+  typst:
+    papersize: a4
+    margin:
+      x: 1.8cm
+      y: 1.6cm
+    fontsize: 10pt
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+res <- readRDS("outputs/resultats.rds")
+
+fmt <- function(x, d = 0) format(round(x, d), big.mark = " ", decimal.mark = ",", nsmall = d)
+fp  <- function(p) if (p < 0.001) "< 0,001" else paste("=", fmt(p, 3))
+
+dv  <- res$domaine_vital
+g50 <- dv[dv$niveau == "KDE 50 %", ]
+g95 <- dv[dv$niveau == "KDE 95 %", ]
+sk  <- res$sensibilite_kde
+
+inv <- res$inventaire_jeux
+j1  <- inv[1, ]
+nom_j1 <- "OGREVA (DREAL Corse)"
+jp  <- res$jours_par_jeu
+jp1 <- jp[jp$jeu_donnees == j1$jeu_donnees, ]
+
+rob <- res$robustesse_jeu
+r_sans <- rob[grepl("Sans", rob$variante), ]
+r_jour <- rob[grepl("jour", rob$variante), ]
+
+rec <- res$recent
+r_anc <- rec[rec$periode == "2000–2010", ]
+r_rec <- rec[rec$periode != "2000–2010", ]
+
+pm <- res$par_mois
+pm_j1 <- pm[grepl("^Jeu principal", pm$source), ]
+pm_au <- pm[!grepl("^Jeu principal", pm$source), ]
+pct_j1_hiver <- 100 * sum(pm_j1$n[pm_j1$mois <= 4]) / sum(pm_j1$n)
+pct_au_ete   <- 100 * sum(pm_au$n[pm_au$mois %in% 6:9]) / sum(pm_au$n)
+
+lac <- res$lacunes
+lac_k <- function(k) lac$part_plateau_au_dela_pct[lac$seuil_km == k]
+
+h_obs <- res$habitat_resume[res$habitat_resume$type == "Observations", ]
+hp_dis <- res$habitat_secteur[res$habitat_secteur$type != "Observations", ]
+th <- res$tests_habitat
+p_th <- function(cmp, var) th$p_value[th$comparaison == cmp & th$variable == var]
+
+j <- res$journal
+n_grille <- sum(res$exclus_grille$n)
+n_flou   <- sum(res$exclus_floutes$n)
+pr <- res$positions_repetees
+
+tr <- res$trafic
+Z1 <- "Zone centrale (KDE 50 %)"; Z2 <- "Zone étendue (KDE 50-95 %)"; Z3 <- "Reste du Parc"
+med <- function(motif, zone) tr$trafic_median[grepl(motif, tr$couche) & tr$zone == zone][1]
+rap <- function(motif) med(motif, Z1) / med(motif, Z3)
+tc <- res$trafic_cotier
+rap_cot <- function(motif) { l <- tc[grepl(motif, tc$couche), ][1, ]; l$median_centrale / l$median_reste_cotier }
+```
+
+```{=typst}
+#align(center)[#text(size: 10pt)[Gwladys Helaine · octobre 2026]]
+#v(4pt)
+#let bleu = rgb("#2f6690")
+#let bleu-clair = rgb("#e8f1f7")
+#block(width: 100%, inset: (x: 8pt, top: 5pt, bottom: 5pt), radius: 4pt, stroke: 1pt + bleu)[
+#text(weight: "bold", size: 12pt, fill: bleu)[Synthèse]
+#h(6pt)
+#text(size: 8pt, style: "italic", fill: bleu)[l'essentiel de la note en une page]
+#v(2pt)
+#block(width: 100%, inset: (x: 8pt, y: 5pt), fill: rgb("#f4f4f2"), radius: 3pt)[
+  #text(size: 9pt)[Cet exercice s'inspire de la première mission du poste : étudier la répartition des grands dauphins du Parc à partir des données existantes, avant de collecter des informations sur leurs interactions avec les activités humaines. Il reprend, avec des contrôles supplémentaires, un premier exercice joint à ma candidature. Réalisé à partir de données publiques uniquement, il illustre une démarche et ne se substitue pas aux suivis du Parc et de ses partenaires.]
+]
+#v(2pt)
+#text(weight: "bold", size: 10.5pt, fill: bleu)[Les questions posées]
+#v(3pt)
+#let etape(titre, question) = box(width: 100%, height: 44pt, inset: 3pt, radius: 3pt,
+  fill: bleu-clair, stroke: 0.5pt + bleu)[
+  #set align(center + horizon)
+  #set par(justify: false)
+  #text(weight: "bold", size: 8.5pt)[#titre] \
+  #text(size: 7pt)[#question]
+]
+#let fleche = align(center + horizon)[#text(size: 11pt, fill: bleu)[→]]
+#grid(columns: (1fr, 10pt, 1fr, 10pt, 1fr, 10pt, 1fr, 10pt, 1fr, 10pt, 1fr), align: horizon,
+  etape("Données", "Que valent les données publiques ?"), fleche,
+  etape("Zones", "Où les dauphins sont-ils observés ?"), fleche,
+  etape("Robustesse", "Cette image tient-elle ?"), fleche,
+  etape("Lacunes", "Où les données manquent-elles ?"), fleche,
+  etape("Habitat", "Dans quel milieu ?"), fleche,
+  etape("Trafic", "Quelles activités dans ces zones ?"),
+)
+#v(4pt)
+#grid(columns: (50%, 1fr), gutter: 12pt, align: top,
+  [
+    #image("outputs/figures/schema_synthese.png", width: 100%)
+    #text(size: 7pt, style: "italic")[Représentation simplifiée. Trafic : 5 % des cellules du Parc les plus fréquentées par chaque catégorie, hors cellules isolées (AIS, EMODnet 2023). Zones estimées avec toutes les observations ; la zone centrale dépend du jeu principal (figure 2). Cartes complètes en figures 1 et 4.]
+  ],
+  [
+    #text(weight: "bold", size: 10.5pt, fill: bleu)[Ce que montre l'exercice]
+    #v(2pt)
+    #set text(size: 8.2pt)
+    #set par(justify: false)
+    - *Données* : 161 observations publiques retenues dans le Parc, dont 78 % issues d'un seul jeu (OGREVA, DREAL Corse, 2004–2007) et recueillies en 18 journées ; 28 seulement datent de 2011 ou après.
+    - *Localisation* : une concentration dans le golfe de Saint-Florent, qui dépend de ce jeu : avec une seule position par jour, ou sans lui, la zone centrale s'étend le long de l'Agriate et de la côte ouest du Cap Corse.
+    - *Habitat* : observations sur le plateau continental, un peu plus près de la côte que l'ensemble du plateau (2,5 km contre 3,8 km en médiane).
+    - *Trafic* : la plaisance et la voile sont plus denses dans la zone centrale que dans le reste du Parc, mais pas davantage que le long des autres côtes : l'écart tient à la proximité de la côte. Les navires à passagers y sont peu présents.
+    #v(2pt)
+    #text(weight: "bold", size: 10.5pt, fill: bleu)[Pistes, à titre d'illustration]
+    #v(2pt)
+    - *Partir de données récentes* : les données publiques sont anciennes et dominées par quelques sorties ; celles du Parc et de ses partenaires seraient le vrai point de départ.
+    - *Une lacune à vérifier* : la côte est et le nord du Cap Corse ne comptent presque aucune observation publique.
+    - *Plusieurs usagers concernés* : la plaisance et la voile fréquentent toute la bande côtière, et les petites embarcations, absentes de l'AIS, n'apparaissent pas dans ces données.
+    #text(size: 7.5pt, style: "italic")[Pistes tirées de données publiques incomplètes : les données et l'expertise du Parc conduiraient très probablement à d'autres conclusions.]
+  ]
+)
+#v(3pt)
+#block(width: 100%, inset: 5pt, radius: 3pt, fill: rgb("#f7f1e6"), stroke: 0.5pt + rgb("#b8955a"))[
+  #set par(justify: false)
+  #text(size: 8.5pt)[*Ce que l'exercice ne permet pas* : délimiter un domaine vital, distinguer des groupes, conclure à une préférence d'habitat ou mesurer des interactions. Il faudrait pour cela d'autres types de données : observations récentes avec effort connu, photo-identification, fréquentation des petites embarcations.]
+]
+]
+#v(3pt)
+#align(center)[#text(size: 8pt)[Méthodes, résultats et limites : note détaillée, pages suivantes. Code et données : #link("https://github.com/gwladys-helaine/delfinu-domaine-vital")[github.com/gwladys-helaine/delfinu-domaine-vital]]]
+#pagebreak()
+#text(weight: "bold", size: 14pt, fill: rgb("#2f6690"))[Note détaillée]
+#v(2pt)
+```
+
+## Contexte et objectif
+
+Le projet Delfinu, co-porté par les parcs naturels marins du Cap Corse et de l'Agriate et d'Iroise, vise à comprendre et réduire les pressions humaines sur les grands dauphins (*Tursiops truncatus*) côtiers. La première mission du poste est d'étudier leur domaine vital dans le Parc à partir des données existantes. Le **domaine vital** désigne l'espace utilisé habituellement par un individu ou un groupe ; avec des observations opportunistes, sans identification des individus, on n'en obtient qu'une approximation, appelée ici **zones de concentration des observations**.
+
+Cette note reprend un premier exercice joint à ma candidature, à partir des mêmes sources de données publiques. Elle y ajoute des contrôles qui en changent plusieurs conclusions : robustesse de la zone centrale au jeu de données principal et au nombre de sorties, données récentes, lacunes de couverture, habitat comparé au seul plateau continental, et trafic comparé à distance de la côte égale. Elle est organisée autour de questions que se poserait la personne en poste avant de construire un suivi.
+
+## Données et méthodes
+
+| Donnée | Source | Caractéristiques |
+|:-----------|:-------------|:-------------|
+| Observations de *Tursiops truncatus* | Portails OBIS et GBIF (téléchargement automatisé sous R) | Données de présence, standard Darwin Core |
+| Bathymétrie | NOAA ETOPO 2022 | Résolution d'environ `r fmt(round(res$resolution_bathy_m, -1))` m |
+| Périmètre du Parc | PatriNat, base des espaces protégés (07/2026) | Polygone officiel |
+| Densité de navires | EMODnet Human Activities | Données AIS, moyenne annuelle 2023, grille de 1 km ; tous navires, plaisance, voile, passagers, pêche |
+
+Toutes les couches sont projetées en **Lambert-93 (EPSG:2154)**, système métrique nécessaire au calcul des surfaces et des distances.
+
+**Nettoyage et contrôle qualité.** Le but est de ne garder que des observations fiables de dauphins vivants en mer. Les enregistrements des deux portails ont été harmonisés puis filtrés (échouages, doublons, dates antérieures à 2000, précision supérieure à 5 km, points à terre, agrégation à une observation par km² et par jour ; annexe 1). Deux contrôles mis au point sur les données de l'Iroise ont été ajoutés : positions ramenées sur une grille de 5 minutes d'arc (`r fmt(n_grille)` enregistrement ici) et doublons imprécis d'un autre jeu plus précis (`r fmt(n_flou)`). Deux points de vigilance, non filtrés, ont aussi été relevés : des positions répétées à l'identique à des dates différentes (`r nrow(pr)` points, `r sum(pr$n)` observations d'un même jeu, déclarées à 5 km près), et le nombre de journées dont proviennent les observations de chaque jeu (annexe 2). La répartition des observations dans l'année est aussi décrite par jeu. Au total, **`r fmt(res$n_parc)` observations** sont retenues dans le Parc, de `r res$annees[1]` à `r res$annees[2]`.
+
+**Zones de concentration.** Le but est de repérer où les observations sont regroupées. Leur densité est estimée par la **méthode des noyaux** (KDE ; Worton, 1989) : un noyau gaussien est centré sur chaque observation, et la somme des noyaux donne une surface de densité. La **largeur de bande** *h*, qui fixe le lissage, est calculée par la formule de référence $h_{\text{ref}} = \sigma \, n^{-1/6}$, à partir de la dispersion des positions ($\sigma$) et de leur nombre ($n$). Les **isoplèthes** 50 % (zone centrale) et 95 % (zone étendue) délimitent les plus petites surfaces contenant 50 % et 95 % de la densité. L'estimation porte sur l'ensemble du Parc : contrairement à l'Iroise, où deux groupes distincts sont décrits par les suivis, les observations forment ici une seule concentration côtière, et aucun découpage en secteurs n'est justifié.
+
+**Robustesse.** Le but est de vérifier que la zone centrale ne dépend pas d'un choix ou d'une source. Elle est recalculée (i) avec une largeur de bande divisée par deux, la formule de référence ayant tendance à surlisser ; (ii) sans le jeu de données principal ; (iii) avec une seule position par jour et par jeu de données (centre des positions du jour), car plusieurs positions notées le même jour décrivent souvent une même sortie, voire un même groupe suivi. Chaque variante est comparée à la zone de référence. Enfin, pour savoir si les données décrivent encore la situation actuelle, les observations de 2011 et après sont comparées aux plus anciennes (part située dans les zones estimées).
+
+**Lacunes.** Le but est de savoir où les données manquent. Chaque cellule du plateau continental du Parc (fonds de moins de 200 m) est caractérisée par sa distance à l'observation publique la plus proche.
+
+**Habitat.** Le but est de vérifier si les observations se situent dans un milieu particulier. L'habitat utilisé est comparé au milieu disponible selon un plan **utilisation / disponibilité** (Manly et al., 2002), avec 10 points tirés au hasard par observation sur le seul plateau continental : tiré dans tout le Parc, le milieu disponible serait dominé par des fonds de plus de 1 000 m, et la différence avec des observations côtières serait évidente. La profondeur désigne la hauteur d'eau au point d'observation, lue sur la bathymétrie. Profondeur et distance à la côte sont comparées par des **tests de Wilcoxon-Mann-Whitney**.
+
+**Trafic maritime.** L'objectif est descriptif : identifier les catégories de navires présentes dans les zones de concentration, sans rechercher de relation de cause à effet. EMODnet calcule, pour chaque cellule de 1 km², le temps cumulé de présence des navires équipés de l'AIS (en heures par km² et par mois, moyenne de 2023) ; l'AIS n'est obligatoire que pour une partie des navires. La **densité médiane** est comparée entre la zone centrale, la zone étendue et le reste du Parc. La zone centrale étant côtière, et le trafic plus dense près des côtes, elle est aussi comparée à la seule partie du reste du Parc située à une distance de la côte comparable (pas plus loin que 90 % des cellules de la zone centrale). Les cellules voisines n'étant pas indépendantes, aucun test statistique n'est appliqué.
+
+## Résultats
+
+### Que valent les données publiques ?
+
+Le jeu principal, **`r nom_j1`**, fournit `r fmt(j1$part_pct)` % des observations retenues (`r j1$n` sur `r fmt(res$n_parc)`), toutes de `r j1$annee_min` à `r j1$annee_max`, sans précision déclarée. Ses `r jp1$n_obs` observations proviennent de **`r jp1$n_jours` journées** seulement, et les cinq plus fournies en réunissent `r fmt(jp1$part_5_jours_les_plus_fournis_pct)` % : il s'agit vraisemblablement de quelques sorties au cours desquelles des positions successives ont été notées, peut-être pour les mêmes groupes. Le nombre de rencontres indépendantes est donc bien plus faible que le nombre d'observations. Ces données n'ont pas été recueillies pour estimer une répartition : c'est l'usage qui en est fait ici, et non leur qualité, qui impose la prudence. Seules `r r_rec$n` observations datent de 2011 ou après, surtout issues des survols de l'Observatoire Pelagis et du programme GDEGeM (GIS3M). Les observations du jeu principal ont lieu surtout de janvier à avril (`r fmt(pct_j1_hiver)` %), celles des autres jeux plutôt de juin à septembre (`r fmt(pct_au_ete)` %) : la répartition dans l'année reflète d'abord le calendrier de chaque source, et ne renseigne pas sur une saisonnalité de la présence des dauphins. Le détail par jeu figure en annexe 2.
+
+### Où les dauphins sont-ils observés, et cette image tient-elle ?
+
+Avec toutes les observations (*h* = `r fmt(res$href_km, 1)` km), la zone centrale couvre **`r fmt(g50$surface_km2)` km²** dans le golfe de Saint-Florent et le long de l'Agriate, et la zone étendue `r fmt(g95$surface_km2)` km² (`r fmt(g95$part_du_parc_pct, 1)` % du Parc), le long de la côte ouest du Cap Corse et au large de l'Agriate (@fig-carte). Quelques observations isolées au large forment de petits contours : elles concernent peut-être des dauphins de passage ou du large, que les données ne permettent pas de distinguer.
+
+```{r}
+#| label: tbl-robustesse
+#| tbl-cap: "Robustesse de la zone centrale (isoplèthe 50 %)"
+tab_r <- data.frame(
+  Variante = c("Toutes les observations (référence)", "Largeur de bande divisée par deux",
+               "Sans le jeu principal", "Une position par jour et par jeu"),
+  n = c(fmt(res$n_parc), fmt(res$n_parc), fmt(r_sans$n_points), fmt(r_jour$n_points)),
+  h = c(fmt(res$href_km, 1), fmt(sk$h_km, 1), fmt(r_sans$h_km, 1), fmt(r_jour$h_km, 1)),
+  S = c(fmt(g50$surface_km2), fmt(sk$surface_coeur_km2), fmt(r_sans$surface_centrale_km2), fmt(r_jour$surface_centrale_km2)),
+  Dans = c("–", paste0(fmt(sk$part_coeur_dans_reference_pct), " %"),
+           paste0(fmt(r_sans$part_dans_reference_pct), " %"), paste0(fmt(r_jour$part_dans_reference_pct), " %")),
+  check.names = FALSE)
+knitr::kable(tab_r, align = "lrrrr", row.names = FALSE,
+  col.names = c("Variante", "n", "h (km)", "Surface (km²)", "Part dans la zone de référence"))
+```
+
+*n = nombre d'observations ou de positions journalières ; Part dans la zone de référence = part de la zone centrale de la variante située dans la zone centrale de référence. Dans les deux dernières variantes, la zone de référence est entièrement comprise dans la nouvelle zone centrale.*
+
+Avec une largeur de bande divisée par deux, la zone centrale reste au même endroit. En revanche, elle **dépend du jeu de données principal et du nombre de sorties** (@tbl-robustesse, @fig-robustesse) : sans OGREVA, ou avec une seule position par jour et par jeu, elle couvre `r fmt(r_sans$surface_centrale_km2)` et `r fmt(r_jour$surface_centrale_km2)` km² au lieu de `r fmt(g50$surface_km2)` km², le long de l'Agriate et de la côte ouest du Cap Corse. La concentration dans le golfe de Saint-Florent tient donc surtout à quelques sorties du jeu principal ; la présence sur la bande côtière ouest, elle, est retrouvée dans toutes les variantes.
+
+Les données récentes vont dans le même sens : parmi les observations de 2000 à 2010, `r fmt(r_anc$part_dans_centrale_pct)` % se situent dans la zone centrale ; parmi celles de 2011 et après, `r fmt(r_rec$part_dans_centrale_pct)` % seulement, toutes restant dans la zone étendue. Les observations récentes, peu nombreuses, sont donc plus dispersées le long de la côte, ce qui peut tenir à la présence des dauphins comme à des protocoles différents (survols, sorties en mer). Les zones étant estimées à partir de toutes les observations, cette comparaison n'est pas indépendante.
+
+![Zones de concentration des observations, estimées sur l'ensemble du Parc](outputs/figures/carte_domaine_vital.png){#fig-carte width=80%}
+
+![Zone centrale avec toutes les observations, sans le jeu principal, puis avec une seule position par jour et par jeu de données](outputs/figures/carte_robustesse.png){#fig-robustesse width=80%}
+
+### Où les données manquent-elles ?
+
+Le plateau continental couvre `r fmt(lac$surface_plateau_km2[1])` km² dans le Parc. Sur cette surface, `r fmt(lac_k(5))` % se trouvent à plus de 5 km de toute observation publique, et `r fmt(lac_k(10))` % à plus de 10 km (@fig-lacunes). Les lacunes se situent surtout sur la côte est et au nord du Cap Corse. Un secteur éloigné des observations n'est pas un secteur sans dauphins : il peut être peu prospecté par les sources publiques, ou couvert par des données non publiques.
+
+![Plateau continental du Parc selon la distance à l'observation publique la plus proche](outputs/figures/carte_lacunes_plateau.png){#fig-lacunes width=80%}
+
+### Dans quel milieu ?
+
+Comparées à l'ensemble du plateau continental, les observations sont un peu moins profondes (`r fmt(h_obs$prof_mediane_m)` m contre `r fmt(hp_dis$prof_mediane_m)` m ; p `r fp(p_th("Plateau continental", "profondeur"))`) et un peu plus proches de la côte (**`r fmt(h_obs$dist_mediane_km, 1)` km contre `r fmt(hp_dis$dist_mediane_km, 1)` km** ; p `r fp(p_th("Plateau continental", "distance à la côte"))`). L'écart est modeste et peut tenir aux observateurs, plus nombreux près des côtes et des ports. Les observations voisines n'étant pas indépendantes, les p-values sont optimistes.
+
+### Quelles activités dans ces zones ?
+
+```{r}
+#| label: tbl-trafic
+#| tbl-cap: "Densité médiane de navires par zone, puis contrôle de la proximité de la côte"
+#| tbl-colwidths: [16, 11, 11, 11, 15, 13, 23]
+cats <- list(c("tous", "Tous navires"), c("plaisance", "Plaisance"), c("voile", "Voile"),
+             c("passager", "Passagers"), c("peche", "Pêche"))
+f2 <- function(x) sub(".", ",", formatC(signif(x, 2), digits = 2, format = "fg", flag = "#"), fixed = TRUE)
+lignes <- lapply(cats, function(cc) {
+  if (!any(grepl(cc[1], tr$couche))) return(NULL)
+  lc <- tc[grepl(cc[1], tc$couche), ][1, ]
+  mc <- med(cc[1], Z1); mr <- med(cc[1], Z3)
+  data.frame(Cat = cc[2], C = f2(mc), E = f2(med(cc[1], Z2)), R = f2(mr),
+             Rap = if (isTRUE(mr > 0) && isTRUE(mc > 0)) paste0("× ", fmt(mc / mr, 1)) else "–",
+             RC = f2(lc$median_reste_cotier),
+             Rap2 = if (isTRUE(lc$median_reste_cotier > 0) && isTRUE(lc$median_centrale > 0)) paste0("× ", fmt(lc$median_centrale / lc$median_reste_cotier, 1)) else "–",
+             check.names = FALSE)
+})
+knitr::kable(do.call(rbind, lignes), align = "lrrrrrr", row.names = FALSE,
+  col.names = c("Catégorie", "Centrale", "Étendue", "Reste", "Centrale / reste", "Reste côtier", "Centrale / reste côtier"))
+```
+
+*Densités médianes en heures de présence de navires par km² et par mois (AIS, 2023). Reste côtier = cellules du reste du Parc situées à moins de `r fmt(tc$dist_max_km[1], 1)` km de la côte (`r fmt(tc$n_cellules_reste_cotier[1])` cellules). « Tous navires » inclut la pêche.*
+
+- **Sans contrôle** : la densité médiane est `r fmt(rap("tous"), 1)` fois plus élevée dans la zone centrale que dans le reste du Parc pour l'ensemble des navires, `r fmt(rap("plaisance"), 1)` fois pour la plaisance et `r fmt(rap("voile"), 1)` fois pour la voile (@tbl-trafic). C'est le résultat mis en avant dans la première version de l'exercice.
+- **Avec le contrôle de la proximité de la côte** : l'écart **disparaît** pour la plaisance (× `r fmt(rap_cot("plaisance"), 1)`) et la voile (× `r fmt(rap_cot("voile"), 1)`), et s'inverse pour l'ensemble des navires (× `r fmt(rap_cot("tous"), 1)`). La zone centrale n'est donc pas plus fréquentée que le reste de la bande côtière : le contraste précédent tenait à sa position côtière. Les navires à passagers, qui suivent des routes au large et le long de la côte est vers Bastia, y sont nettement moins présents (@fig-trafic). Pour la pêche, les densités AIS sont quasi nulles partout : la plupart des petites unités de pêche artisanale ne sont pas tenues d'être équipées de l'AIS, et ces données ne permettent pas de conclure.
+- **Portée** : ces résultats décrivent un chevauchement spatial entre les observations et le trafic des navires équipés de l'AIS. Ils ne renseignent ni sur la distance entre navires et animaux, ni sur la vitesse, le bruit ou les réactions, et ne mesurent ni interaction ni impact. La plaisance légère, les sorties en mer et la pêche artisanale, absentes de l'AIS, n'y figurent pas.
+
+![Densité de navires par catégorie (plaisance, voile, navires à passagers ; AIS, 2023) et zones de concentration des observations](outputs/figures/carte_trafic_categories.png){#fig-trafic width=100%}
+
+### Comparaison avec les connaissances publiées
+
+Le programme GDEGeM (Labach et al., 2022) a montré que le taux de rencontre du grand dauphin était plus élevé autour de la Corse que sur le littoral continental, avec des groupes plus petits ; les recaptures par photo-identification y étaient trop peu nombreuses pour estimer une abondance. La présence sur la bande côtière ouest, retrouvée dans toutes les variantes, est cohérente avec ces travaux, menés sur le plateau continental ; la concentration plus précise dans le golfe de Saint-Florent, elle, n'est portée que par un jeu de données.
+
+## Limites
+
+- **Effort d'observation inconnu et une source dominante** : `r fmt(j1$part_pct)` % des observations proviennent d'un seul jeu opportuniste, recueilli en `r jp1$n_jours` journées. Les zones reflètent autant la répartition des observateurs que l'usage de l'espace par les dauphins.
+- **Données anciennes** : la plupart des observations datent de 2004 à 2007, alors que le trafic correspond à 2023 ; `r r_rec$n` seulement datent de 2011 ou après.
+- **Pas d'identification individuelle** : impossible d'attribuer les observations à des groupes, de distinguer résidents et individus de passage, ou d'estimer un véritable domaine vital.
+- **Observations dépendantes** : des positions successives d'une même sortie ne sont pas indépendantes ; les p-values sont optimistes.
+- **Trafic côtier sous-estimé** : l'AIS ne couvre ni la plaisance légère ni la pêche artisanale.
+- **Résolution** : bathymétrie à environ `r fmt(round(res$resolution_bathy_m, -1))` m et trafic à 1 km, grossiers pour une espèce côtière.
+
+## Conclusion
+
+Appliquée aux mêmes sources de données publiques que la première version, la démarche montre que ces données retrouvent la **présence de l'espèce sur la bande côtière ouest du Parc**, mais que la concentration dans le golfe de Saint-Florent repose surtout sur quelques sorties d'un seul jeu de données, recueilli de 2004 à 2007. Le chevauchement avec la plaisance, mis en avant dans la première version, **ne résiste pas** au contrôle de la proximité de la côte : la zone centrale n'est pas plus fréquentée que le reste de la bande côtière. Les données ne permettent ni de délimiter un domaine vital, ni de mesurer des interactions.
+
+À titre d'illustration seulement, voici comment ces résultats pourraient commencer à être lus du point de vue de la gestion ; les données et l'expertise du Parc conduiraient très probablement à d'autres conclusions.
+
+- **Partir de données récentes** : les données publiques sont anciennes et dominées par quelques sorties ; les données du Parc et de ses partenaires seraient le vrai point de départ d'une étude du domaine vital.
+- **Une lacune à vérifier** : la côte est et le nord du Cap Corse ne comptent presque aucune observation publique, ce qui peut tenir à des observations non publiées, à une moindre prospection par les sources publiques ou à une moindre présence des dauphins.
+- **Plusieurs usagers concernés** : la plaisance et la voile fréquentent l'ensemble de la bande côtière, et non la seule zone centrale ; les petites embarcations et la pêche artisanale, absentes de l'AIS, n'apparaissent pas dans ces données.
+
+Le script a été conçu pour intégrer d'autres données : un fichier d'observations (longitude, latitude, date), déposé dans `data/raw/observations_complementaires.csv`, est ajouté aux données publiques et traité par l'ensemble de l'analyse.
+
+*Le code et la rédaction de cette note ont été réalisés avec l'aide d'un assistant d'IA (Claude, Anthropic). J'ai conduit la démarche, vérifié les données, les résultats et les références, et arbitré les choix de méthode et d'interprétation.*
+
+## Références
+
+- Labach H., Azzinari C., Barbier M., Cesarini C., Daniel B., David L., Dhermain F., Di-Méglio N., Guichard B., Jourdan J., Lauret V., Robert N., Roul M., Tomasi N., Gimenez O. (2022). Distribution and abundance of common bottlenose dolphin (*Tursiops truncatus*) over the French Mediterranean continental shelf. *Marine Mammal Science*, 38(1), 212–222. doi:10.1111/mms.12874
+- Manly B. F. J., McDonald L. L., Thomas D. L., McDonald T. L., Erickson W. P. (2002). *Resource selection by animals: statistical design and analysis for field studies* (2^e^ éd.). Kluwer Academic Publishers.
+- Worton B. J. (1989). Kernel methods for estimating the utilization distribution in home-range studies. *Ecology*, 70(1), 164–168.
+
+**Sources de données** (consultées en octobre 2026) : OBIS (obis.org) ; GBIF (gbif.org) ; NOAA National Centers for Environmental Information (2022), *ETOPO 2022 15 Arc-Second Global Relief Model*, doi:10.25921/fd45-gt74 ; EMODnet Human Activities, *Vessel density maps*, 2023 ; PatriNat (OFB, MNHN, CNRS, IRD), base des espaces protégés, juillet 2026.
+
+*Code, données nettoyées et résultats : <https://github.com/gwladys-helaine/delfinu-domaine-vital>. Analyse reproductible, réalisée sous R (sf, terra, ggplot2) et Quarto.*
+
+```{=typst}
+#pagebreak()
+```
+
+## Annexe 1 – Étapes du nettoyage des observations
+
+Les filtres sont appliqués dans l'ordre du tableau : un enregistrement retiré à une étape n'est plus compté aux suivantes.
+
+```{r}
+#| label: nettoyage
+#| tbl-colwidths: [70, 15, 15]
+etapes <- j$etape
+if (!any(inv$jeu_donnees == "Données complémentaires")) etapes <- sub(" + complémentaires", "", etapes, fixed = TRUE)
+etapes <- sub("Précision de localisation <= 5 km", "Précision de localisation ≤ 5 km ou non déclarée", etapes, fixed = TRUE)
+etapes <- gsub(">=", "≥", gsub("<=", "≤", etapes, fixed = TRUE), fixed = TRUE)
+tab_n <- data.frame(Etape = etapes,
+                    Retires = c("–", fmt(-diff(j$n_restant))),
+                    Restant = fmt(j$n_restant))
+knitr::kable(tab_n, align = "lrr", row.names = FALSE, col.names = c("Étape", "Retirés", "Restant"))
+```
+
+## Annexe 2 – Jeux de données retenus dans le Parc
+
+```{r}
+#| label: inventaire
+#| tbl-colwidths: [52, 8, 14, 8, 9, 9]
+court <- function(x) sub(" - .*$", "", x)
+tab_i <- merge(inv, jp[, c("jeu_donnees", "n_jours")], by = "jeu_donnees", sort = FALSE)
+tab_i <- tab_i[order(-tab_i$n), ]
+knitr::kable(data.frame(Jeu = court(tab_i$jeu_donnees), n = tab_i$n,
+                        Periode = ifelse(tab_i$annee_min == tab_i$annee_max, as.character(tab_i$annee_min), paste0(tab_i$annee_min, "–", tab_i$annee_max)),
+                        Jours = tab_i$n_jours, Depuis = tab_i$n_depuis_2011,
+                        Part = paste0(trimws(fmt(tab_i$part_pct)), "\u00a0%")),
+             align = "lrcrrr", row.names = FALSE,
+             col.names = c("Jeu de données", "n", "Période", "Jours", "Depuis 2011", "Part"))
+```
+
+*Jours = nombre de journées distinctes dont proviennent les observations du jeu.*
