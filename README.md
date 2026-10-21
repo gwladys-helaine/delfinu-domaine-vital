@@ -28,7 +28,7 @@ Depuis l'envoi de cette candidature, j'ai repris la démarche pour le Parc natur
 - **Trafic** : la comparaison oppose des eaux côtières (le cœur estimé, dans le golfe de Saint-Florent, près d'un port) à un reste du Parc majoritairement au large. L'écart observé peut donc tenir en partie à la seule proximité de la côte, biais que le test de sensibilité au seuil ne permet pas d'écarter. En Iroise, une comparaison à distance de la côte équivalente inversait l'écart pour la plaisance et la voile ; ce contrôle n'a pas été fait ici.
 - **Habitat** : le biais d'effort d'observation est signalé dans les limites de la note, mais il n'est pas pris en compte dans la comparaison avec le milieu disponible. Le caractère côtier des observations ne permet donc pas, à lui seul, de conclure à une préférence des dauphins.
 - **Vocabulaire** : pour des observations opportunistes, sans suivi d'individus, le terme « domaine vital » est trop fort ; « zones de concentration des observations » serait plus juste.
-- **Contrôle qualité** : les données n'ont pas été examinées pour d'éventuelles positions ramenées au centre de mailles d'atlas ou des doublons aux coordonnées dégradées, deux défauts rencontrés dans les données de l'Iroise.
+- **Contrôle qualité** : les données n'ont pas été examinées pour d'éventuelles positions ramenées au centre de mailles d'atlas ou des doublons imprécis, deux défauts rencontrés dans les données de l'Iroise.
 
 ## Contenu du dépôt
 
