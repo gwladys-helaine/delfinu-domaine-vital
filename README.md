@@ -1,72 +1,49 @@
-# Domaine vital du grand dauphin dans le PNM du Cap Corse et de l'Agriate
+# Grand dauphin dans le PNM du Cap Corse et de l'Agriate : analyse exploratoire
 
-Analyse exploratoire, à partir de données ouvertes, du domaine vital du grand dauphin (*Tursiops truncatus*) dans le Parc naturel marin du Cap Corse et de l'Agriate et de son chevauchement avec le trafic maritime. Exercice préparatoire au projet Delfinu.
+Exercice personnel d'analyse de données ouvertes sur la répartition des observations de grand dauphin (*Tursiops truncatus*) dans le Parc naturel marin du Cap Corse et de l'Agriate et sur leur chevauchement avec le trafic maritime, réalisé dans le cadre d'une candidature au projet Delfinu.
 
 **Auteure :** Gwladys Helaine — octobre 2026
 
-**À lire en premier :** [`note.pdf`](note.pdf), la note de synthèse jointe à la candidature, conservée telle qu'envoyée. Les limites identifiées depuis sont indiquées plus bas, dans la section [Retour critique](#retour-critique-octobre-2026).
+## Deux versions
+
+- **Version révisée, à lire en premier : [`v2/note.pdf`](v2/note.pdf).** La page 1 en donne la synthèse. Elle reprend l'exercice après l'envoi de la candidature, avec des contrôles supplémentaires.
+- **Version jointe à la candidature : [`note.pdf`](note.pdf)**, conservée telle qu'envoyée, avec le code correspondant à la racine du dépôt.
 
 <p align="center">
-  <img src="carte_domaine_vital.png" width="49%" alt="Domaine vital estimé du grand dauphin">
-  <img src="carte_trafic.png" width="49%" alt="Trafic maritime et domaine vital">
+  <img src="v2/carte_robustesse.png" width="80%" alt="Zone centrale selon les observations retenues">
 </p>
-<p align="center"><em>À gauche : domaine vital estimé (isoplèthes 50 % et 95 %). À droite : densité de navires (AIS, 2023) et domaine vital.</em></p>
+<p align="center"><em>Version révisée : la zone centrale estimée avec toutes les observations, sans le jeu principal, puis avec une seule position par jour.</em></p>
 
-## Principaux résultats (version jointe à la candidature)
+## Ce qui change dans la version révisée
 
-- 1 329 enregistrements bruts (OBIS, GBIF) → **161 observations** retenues dans le Parc après nettoyage (échouages, doublons, localisations imprécises, points à terre).
-- Cœur du domaine vital (noyau 50 %) : **136 km²**, dans le golfe de Saint-Florent ; domaine vital (noyau 95 %) : **1 165 km²**.
-- Observations côtières : profondeur médiane de 60 m contre 1 962 m pour le milieu disponible.
-- Robustesse : avec une largeur de bande réduite de moitié, 98 % du cœur recalculé reste dans le cœur de référence.
-- Densité médiane de navires (AIS) **2,0 fois** plus élevée dans le cœur du domaine vital que dans le reste du Parc, et **3,3 fois** pour la plaisance ; la surreprésentation des zones de fort trafic dans le domaine vital se maintient quel que soit le seuil testé.
-- Limites principales : 78 % des observations proviennent d'une seule base opportuniste (la répartition reflète aussi l'effort d'observation), et 83 % datent de 2001 à 2010 alors que le trafic date de 2023. Les résultats illustrent une méthode plus qu'ils ne décrivent la situation actuelle.
+Après avoir appliqué la même démarche au Parc naturel marin d'Iroise ([delfinu-iroise](https://github.com/gwladys-helaine/delfinu-iroise)), j'ai identifié plusieurs limites de la première version. La version révisée, à partir des mêmes sources de données publiques, en tient compte :
 
-## Retour critique (octobre 2026)
-
-Depuis l'envoi de cette candidature, j'ai repris la démarche pour le Parc naturel marin d'Iroise ([delfinu-iroise](https://github.com/gwladys-helaine/delfinu-iroise)). Cette deuxième application m'a permis d'identifier plusieurs limites de la présente version :
-
-- **Trafic** : la comparaison oppose des eaux côtières (le cœur estimé, dans le golfe de Saint-Florent, près d'un port) à un reste du Parc majoritairement au large. L'écart observé peut donc tenir en partie à la seule proximité de la côte, biais que le test de sensibilité au seuil ne permet pas d'écarter. En Iroise, une comparaison à distance de la côte équivalente inversait l'écart pour la plaisance et la voile ; ce contrôle n'a pas été fait ici.
-- **Habitat** : le biais d'effort d'observation est signalé dans les limites de la note, mais il n'est pas pris en compte dans la comparaison avec le milieu disponible. Le caractère côtier des observations ne permet donc pas, à lui seul, de conclure à une préférence des dauphins.
-- **Vocabulaire** : pour des observations opportunistes, sans suivi d'individus, le terme « domaine vital » est trop fort ; « zones de concentration des observations » serait plus juste.
-- **Contrôle qualité** : les données n'ont pas été examinées pour d'éventuelles positions ramenées au centre de mailles d'atlas ou des doublons imprécis, deux défauts rencontrés dans les données de l'Iroise.
+- **Zones** : la concentration dans le golfe de Saint-Florent repose surtout sur quelques sorties d'un seul jeu de données (126 observations recueillies en 18 journées, de 2004 à 2007). Sans ce jeu, ou avec une seule position par jour, la zone centrale s'étend le long de l'Agriate et de la côte ouest du Cap Corse.
+- **Trafic** : à distance de la côte comparable, la zone centrale n'est pas plus fréquentée par la plaisance et la voile que le reste de la bande côtière. L'écart de la première version tenait à la proximité de la côte.
+- **Habitat** : comparées au seul plateau continental, les observations sont à peine plus côtières (2,5 km contre 3,8 km en médiane), un écart qui peut tenir aux observateurs.
+- **Vocabulaire et contrôle qualité** : « zones de concentration des observations » remplace « domaine vital », trop fort pour des observations opportunistes ; deux contrôles mis au point en Iroise (positions sur une grille, doublons imprécis) ont été ajoutés.
 
 ## Contenu du dépôt
 
 | Fichier | Rôle |
 |---|---|
-| `analyse.R` | Script complet : téléchargement, nettoyage, domaine vital, habitat, pressions, figures, exports |
-| `note.qmd` / `note.pdf` | Note de synthèse jointe à la candidature (source Quarto et version PDF) |
-| `carte_domaine_vital.png`, `carte_trafic.png` | Cartes |
-| `habitat_profondeur_cote.png`, `trafic_par_zone.png` | Graphiques |
-| `observations_propres_parc.csv` | Observations nettoyées (161) |
-| `journal_nettoyage.csv` | Nombre d'observations restant après chaque règle de nettoyage |
-| `dictionnaire_donnees.csv` | Description de chaque colonne des données nettoyées |
-| `surfaces_domaine_vital.csv`, `habitat_resume.csv`, `modele_habitat.csv`, `trafic_par_zone.csv` | Résultats chiffrés |
-| `sensibilite_domaine_vital.csv` | Analyse de sensibilité du domaine vital (largeur de bande réduite de moitié) |
+| `v2/note.pdf`, `v2/note.qmd` | Note révisée (PDF et source Quarto) |
+| `v2/analyse.R` | Script révisé, adapté de celui de l'Iroise |
+| `v2/observations_propres_parc.csv` | Observations nettoyées (161) |
+| `v2/carte_robustesse.png` | Carte ci-dessus |
+| `note.pdf`, `note.qmd`, `analyse.R` | Version jointe à la candidature (note et script) |
+| autres `*.png`, `*.csv` | Cartes, graphiques et résultats chiffrés de la version jointe à la candidature |
 | `delfinu-exercice.Rproj` | Projet RStudio |
 
 ## Reproduire l'analyse
 
-1. Ouvrir `delfinu-exercice.Rproj` dans RStudio.
-2. Déposer le périmètre du Parc (`sig_metrop.gpkg`, base des espaces protégés de PatriNat) dans `data/raw/parc/` et, en option, les rasters de densité de navires EMODnet dans `data/raw/trafic/`.
-3. Lancer `source("analyse.R")` : le script télécharge les observations et la bathymétrie, puis recrée tous les dossiers et résultats (`data/propre/`, `outputs/`).
-4. Rendre `note.qmd` avec Quarto.
+Ouvrir `delfinu-exercice.Rproj` dans RStudio, déposer le périmètre du Parc (`sig_metrop.gpkg`, base des espaces protégés de PatriNat) dans `data/raw/parc/` et les rasters de densité de navires EMODnet dans `data/raw/trafic/`, puis lancer `v2/analyse.R` (ou `analyse.R` pour la première version). Le script télécharge les observations et la bathymétrie, et recrée les résultats dans `data/propre/` et `outputs/`. Les portails OBIS et GBIF étant alimentés en continu, un nouveau téléchargement peut donner des résultats légèrement différents.
 
-Les données téléchargées sont conservées dans `data/raw/` : un nouveau lancement réutilise exactement les mêmes données. Les versions de R et des packages, ainsi que la date de chaque fichier source, sont enregistrées dans `outputs/session_info.txt`, `outputs/versions_packages.csv` et `outputs/sources_donnees.csv`. Les portails OBIS et GBIF étant alimentés en continu, un nouveau téléchargement peut donner des résultats légèrement différents.
+## Sources et licences
 
-## Sources de données
-
-- Observations : OBIS, GBIF (dont base OGREVA de la DREAL Corse, Observatoire Pelagis, GIS3M, Tethys Research Institute)
-- Bathymétrie : NOAA ETOPO 2022 (via le package marmap)
-- Trafic maritime : EMODnet Human Activities, densité de navires (AIS), moyenne annuelle 2023
-- Périmètre : PatriNat, base des espaces protégés (07/2026)
-
-## Méthodes
-
-Estimation du domaine vital par noyau (isoplèthes 50 % et 95 %, largeur de bande href) et polygone convexe minimum, avec analyse de sensibilité à la largeur de bande ; comparaison utilisation / disponibilité de l'habitat (tests de Wilcoxon, régression logistique) ; comparaison de la densité de navires entre zones du domaine vital, avec test de sensibilité au seuil de fort trafic. Outils : R (sf, terra, dplyr, ggplot2), QGIS, Quarto.
-
-## Licence et utilisation des données
+Observations : OBIS, GBIF (dont base OGREVA de la DREAL Corse, Observatoire Pelagis, GIS3M, Tethys Research Institute) ; bathymétrie : NOAA ETOPO 2022 ; trafic : EMODnet Human Activities, densité de navires (AIS) 2023 ; périmètre : PatriNat, base des espaces protégés (07/2026).
 
 Le code est librement réutilisable. Les observations restent soumises à la licence de leur jeu de données d'origine, indiquée sur OBIS et GBIF ; toute réutilisation doit citer ces jeux.
 
-*Le code a été écrit avec l'aide d'un assistant d'IA. J'ai conduit la démarche, contrôlé les données et les résultats, et arbitré les choix de méthode et d'interprétation.*
+---
+*Le code et les notes ont été réalisés avec l'aide d'un assistant d'IA (Claude, Anthropic). J'ai conduit la démarche, vérifié les données, les résultats et les références, et arbitré les choix de méthode et d'interprétation.*
