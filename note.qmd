@@ -1,11 +1,10 @@
 ---
-title: "Zones de concentration des observations de grand dauphin en Iroise et chevauchement avec le trafic maritime"
-subtitle: "Exercice personnel d'analyse de données ouvertes, réalisé dans le cadre d'une candidature au projet Delfinu"
-author-meta: "Gwladys Helaine"
+title: "Domaine vital du grand dauphin dans le Parc naturel marin du Cap Corse et de l'Agriate et chevauchement avec le trafic maritime"
+subtitle: "Analyse exploratoire de données ouvertes — exercice préparatoire au projet Delfinu"
+author: "Gwladys Helaine"
+date: today
+date-format: "D MMMM YYYY"
 lang: fr
-crossref:
-  tbl-title: "Tableau"
-  tbl-prefix: "Tableau"
 format:
   html:
     embed-resources: true
@@ -31,38 +30,25 @@ res <- readRDS("outputs/resultats.rds")
 fmt <- function(x, d = 0) format(round(x, d), big.mark = " ", decimal.mark = ",", nsmall = d)
 fp  <- function(p) if (p < 0.001) "< 0,001" else paste("=", fmt(p, 3))
 
-# Estimation sur l'ensemble du Parc (première étape)
-dv   <- res$domaine_vital
-g50  <- dv[dv$niveau == "KDE 50 %", ]
-g95  <- dv[dv$niveau == "KDE 95 %", ]
-
-# Estimation par secteur (résultat principal)
-sec  <- res$secteurs
-so   <- res$secteurs_obs
-val  <- function(s, f, niv) sec$surface_km2[sec$secteur == s & sec$facteur_h == f & sec$niveau == niv][1]
-ctr  <- function(s, col) sec[[col]][sec$secteur == s & sec$facteur_h == 1 & sec$niveau == "KDE 50 %"][1]
-info <- function(s, col) so[[col]][so$secteur == s][1]
-n_sect <- sum(so$n_obs)
-
-# Sensibilité au découpage des secteurs
-ss   <- res$sensibilite_secteurs
-sens <- function(s, signe, col) {
-  v <- ss[[col]][ss$secteur == s & sign(ss$marge_km) == signe]
-  if (length(v) == 0) NA else v[1]
-}
-
-# Habitat
+dv    <- res$domaine_vital
+s50   <- dv[dv$niveau == "KDE 50 %", ]
+s95   <- dv[dv$niveau == "KDE 95 %", ]
+smcp  <- dv[dv$niveau == "MCP 95 %", ]
 h_obs <- res$habitat_resume[res$habitat_resume$type == "Observations", ]
 h_dis <- res$habitat_resume[res$habitat_resume$type != "Observations", ]
 or_prof <- res$glm[grepl("prof", res$glm$variable), ]
+pct_jeu1 <- 100 * res$par_jeu$n[1] / sum(res$par_jeu$n)
+nom_jeu1 <- res$par_jeu$jeu_donnees[1]
+if (grepl("OGREVA", nom_jeu1, ignore.case = TRUE)) nom_jeu1 <- "base OGREVA, DREAL Corse"
 rho <- res$correlation_prof_dist
+sens <- res$sensibilite_kde
+sens_ok <- !is.null(sens)
 modele_simple <- abs(rho) > 0.7
 
-# Jeux de données
-pct_jeu1 <- 100 * res$par_jeu$n[1] / sum(res$par_jeu$n)
-nom_jeu1 <- sub(" - .*$", "", res$par_jeu$jeu_donnees[1])
+# Répartition dans le temps
 pa <- res$par_annee
-pct_depuis2014 <- 100 * sum(pa$n[pa$annee >= 2014]) / sum(pa$n)
+pct_avant2011 <- 100 * sum(pa$n[pa$annee <= 2010]) / sum(pa$n)
+n_apres2015   <- sum(pa$n[pa$annee > 2015])
 
 # Journal de nettoyage
 j <- res$journal
@@ -71,34 +57,26 @@ retire <- function(motif) {
   if (is.na(i) || i == 1) 0 else j$n_restant[i - 1] - j$n_restant[i]
 }
 pct_ecartes <- 100 * (1 - tail(j$n_restant, 1) / j$n_restant[1])
-n_grille <- sum(res$exclus_grille$n)
-n_flou   <- sum(res$exclus_floutes$n)
 
-# Trafic (zones définies par secteur)
+# Trafic
 trafic_ok <- isTRUE(res$trafic_disponible)
 if (trafic_ok) {
-  tr <- res$trafic
   med <- function(motif, zone) {
-    v <- tr$trafic_median[grepl(motif, tr$couche) & tr$zone == zone]
+    v <- res$trafic$trafic_median[grepl(motif, res$trafic$couche) & res$trafic$zone == zone]
     if (length(v) == 0) NA else v[1]
   }
-  Z1 <- "Zone centrale (KDE 50 %)"; Z2 <- "Zone étendue (KDE 50-95 %)"; Z3 <- "Reste du Parc"
-  ligne <- function(motif) tr[grepl(motif, tr$couche), ][1, ]
-  part_surf <- ligne("tous")$part_surface_dv_pct
-  ts <- res$trafic_secteurs
-  med_s <- function(s, motif, zone) {
-    v <- ts$trafic_median[ts$secteur == s & grepl(motif, ts$couche) & ts$zone == zone]
-    if (length(v) == 0) NA else v[1]
-  }
-  rap_s <- function(s, motif) med_s(s, motif, "Zone centrale du secteur") / med_s(s, motif, "Reste du secteur")
-  tc <- res$trafic_cotier
-  cot_ok <- !is.null(tc) && nrow(tc) > 0
-  rap_cot <- function(motif) {
-    l <- tc[grepl(motif, tc$couche), ][1, ]
-    l$median_centrale / l$median_reste_cotier
-  }
-  # Le contraste avec le reste du Parc s'inverse-t-il à distance de la côte comparable ?
-  inverse <- cot_ok && rap_cot("plaisance") < 1 && rap_cot("voile") < 1
+  m_coeur  <- med("tous", "Cœur (KDE 50 %)")
+  m_anneau <- med("tous", "Domaine vital (50-95 %)")
+  m_reste  <- med("tous", "Reste du Parc")
+  p_coeur  <- med("plaisance", "Cœur (KDE 50 %)")
+  p_reste  <- med("plaisance", "Reste du Parc")
+  r_tous <- m_coeur / m_reste
+  r_plai <- p_coeur / p_reste
+  ligne_tous <- res$trafic[grepl("tous", res$trafic$couche), ][1, ]
+  ligne_plai <- res$trafic[grepl("plaisance", res$trafic$couche), ][1, ]
+  part_fort      <- ligne_tous$part_fort_trafic_dans_dv_pct
+  part_fort_plai <- ligne_plai$part_fort_trafic_dans_dv_pct
+  part_surf      <- ligne_tous$part_surface_dv_pct
 }
 ```
 
@@ -109,105 +87,52 @@ if (!res$parc_officiel) {
   cat("::: {.callout-warning}\nCette version utilise une emprise **approximative** du Parc. ",
       "Charger la couche officielle avant diffusion.\n:::\n\n")
 }
+if (res$n_parc < 30) {
+  cat("::: {.callout-warning}\nAvec ", res$n_parc, " observations seulement, les surfaces ",
+      "de domaine vital sont très incertaines : ce travail illustre surtout la méthode.\n:::\n\n")
+}
 ```
 
-```{=typst}
-#align(center)[#text(size: 10pt)[Gwladys Helaine · octobre 2026]]
-#v(4pt)
-#let bleu = rgb("#2f6690")
-#let bleu-clair = rgb("#e8f1f7")
-#block(width: 100%, inset: (x: 8pt, top: 5pt, bottom: 5pt), radius: 4pt, stroke: 1pt + bleu)[
-#text(weight: "bold", size: 12pt, fill: bleu)[Synthèse]
-#h(6pt)
-#text(size: 8pt, style: "italic", fill: bleu)[l'essentiel de la note en une page]
-#v(2pt)
-#block(width: 100%, inset: (x: 8pt, y: 5pt), fill: rgb("#f4f4f2"), radius: 3pt)[
-  #text(size: 9pt)[Cet exercice s'inspire des premières missions du poste : étudier la répartition du groupe de grands dauphins de la chaussée de Sein à partir des données existantes, et préparer l'étude de ses interactions avec les activités humaines. Réalisé à partir de données publiques uniquement, il illustre une démarche et ne se substitue pas aux suivis du Parc et de ses partenaires.]
-]
-#v(2pt)
-#text(weight: "bold", size: 10.5pt, fill: bleu)[La démarche]
-#v(3pt)
-#let etape(titre, question) = box(width: 100%, height: 44pt, inset: 3pt, radius: 3pt,
-  fill: bleu-clair, stroke: 0.5pt + bleu)[
-  #set align(center + horizon)
-  #set par(justify: false)
-  #text(weight: "bold", size: 8.5pt)[#titre] \
-  #text(size: 7pt)[#question]
-]
-#let fleche = align(center + horizon)[#text(size: 11pt, fill: bleu)[→]]
-#grid(columns: (1fr, 10pt, 1fr, 10pt, 1fr, 10pt, 1fr, 10pt, 1fr, 10pt, 1fr), align: horizon,
-  etape("Données", "Que contiennent les portails publics ?"), fleche,
-  etape("Nettoyage", "Les observations sont-elles fiables ?"), fleche,
-  etape("Zones", "Où les dauphins sont-ils observés ?"), fleche,
-  etape("Robustesse", "Les résultats dépendent-ils des choix ?"), fleche,
-  etape("Habitat", "Dans quel milieu ?"), fleche,
-  etape("Trafic", "Quelles activités traversent ces zones ?"),
-)
-#v(2pt)
-#align(center)[#text(size: 7.5pt, style: "italic")[Analyse sous R ; données versées, à titre de démonstration, dans une base PostgreSQL / PostGIS consultable dans QGIS.]]
-#v(2pt)
-#v(2pt)
-#grid(columns: (50%, 1fr), gutter: 12pt, align: top,
-  [
-    #image("outputs/figures/schema_synthese.png", width: 100%)
-    #text(size: 7pt, style: "italic")[Représentation simplifiée. Trafic : 5 % des cellules du Parc les plus fréquentées par chaque catégorie, hors cellules isolées (AIS, EMODnet 2023). Cartes complètes en figures 1 et 4.]
-  ],
-  [
-    #text(weight: "bold", size: 10.5pt, fill: bleu)[Ce que montre l'exercice]
-    #v(2pt)
-    #set text(size: 8.2pt)
-    #set par(justify: false)
-    - *Données* : 918 enregistrements publics, 102 retenus dans le Parc ; deux défauts détectés et filtrés (positions ramenées sur une grille, doublons moins précis d'autres observations).
-    - *Localisation* : deux zones de concentration, Molène – Le Conquet et Sein, en accord avec les groupes connus.
-    - *Habitat* : observations au-dessus de fonds moins profonds et plus près de la côte que le milieu disponible, en partie du fait de la répartition des observateurs.
-    - *Trafic* : la plaisance, la voile et les navires à passagers traversent toutes les zones de concentration, notamment le long du chenal du Four, dans le Raz de Sein et sur les liaisons vers les îles. Par rapport au reste de la côte, elles sont surtout plus fréquentées par les navires à passagers (navires équipés de l'AIS seulement).
-    #v(2pt)
-    #text(weight: "bold", size: 10.5pt, fill: bleu)[Pistes, à titre d'illustration]
-    #v(2pt)
-    - *Un premier repérage* : ces zones donnent une première image, à confronter aux données de photo-identification du Parc, seules à même d'estimer le domaine vital des groupes.
-    - *Une lacune à vérifier* : les données publiques ne couvrent presque pas l'ouest de la chaussée de Sein, secteur que le compte rendu de 2021 recommandait de prospecter plus régulièrement.
-    - *Plusieurs usagers concernés* : la plaisance, la voile et les navires à passagers traversent ces zones, et seraient à considérer dans une étude des interactions.
-    #text(size: 7.5pt, style: "italic")[Pistes tirées de données publiques incomplètes : les données et l'expertise du Parc conduiraient très probablement à d'autres conclusions.]
-  ]
-)
-#v(3pt)
-#block(width: 100%, inset: 5pt, radius: 3pt, fill: rgb("#f7f1e6"), stroke: 0.5pt + rgb("#b8955a"))[
-  #set par(justify: false)
-  #text(size: 8.5pt)[*Ce que l'exercice ne permet pas* : délimiter un domaine vital, conclure à une préférence d'habitat ou mesurer des interactions. Il faudrait pour cela d'autres données, notamment celles du Parc : effort d'observation, photo-identification, observations à l'ouest de la chaussée de Sein, fréquentation des petites embarcations, invisibles dans les données AIS.]
-]
-]
-#v(3pt)
-#align(center)[#text(size: 8pt)[Méthodes, résultats et limites : note détaillée, pages suivantes. Code et données : #link("https://github.com/gwladys-helaine/delfinu-iroise")[github.com/gwladys-helaine/delfinu-iroise]]]
-#pagebreak()
-#text(weight: "bold", size: 14pt, fill: rgb("#2f6690"))[Note détaillée]
-#v(2pt)
+```{r}
+#| label: essentiel
+#| output: asis
+cat("::: {.callout-note title=\"Résultats principaux\"}\n")
+cat("- **Domaine vital** : les observations se concentrent dans le golfe de Saint-Florent et le long de la côte ouest du Cap Corse ; ",
+    "le cœur du domaine vital (isoplèthe 50 %) couvre ", fmt(s50$surface_km2), " km², soit ",
+    fmt(s50$part_du_parc_pct, 1), " % de la partie marine du Parc.\n", sep = "")
+cat("- **Habitat** : les observations sont situées sur le plateau continental, à une profondeur médiane de ", fmt(h_obs$prof_mediane_m),
+    " m contre ", fmt(h_dis$prof_mediane_m), " m pour le milieu disponible (Wilcoxon, p ", fp(res$test_prof$p.value), ").\n", sep = "")
+if (trafic_ok) {
+  cat("- **Trafic maritime** : la densité médiane de navires équipés de l'AIS est ", fmt(r_tous, 1),
+      " fois plus élevée dans le cœur du domaine vital que dans le reste du Parc, et ", fmt(r_plai, 1),
+      " fois pour la plaisance.\n", sep = "")
+}
+cat("\n*Analyse exploratoire fondée sur des données publiques majoritairement antérieures à 2011 et opportunistes : ",
+    "les résultats illustrent une méthode plus qu'ils ne décrivent la situation actuelle.*\n:::\n\n", sep = "")
 ```
 
 ## Contexte et objectif
 
-Le projet Delfinu, co-porté par les parcs naturels marins d'Iroise et du Cap Corse et de l'Agriate, vise à comprendre et réduire les pressions humaines sur les grands dauphins (*Tursiops truncatus*) résidents. En Iroise, deux groupes côtiers sont suivis par photo-identification (reconnaissance des individus grâce aux marques naturelles de leur nageoire dorsale), dans l'archipel de Molène et sur la chaussée de Sein. Le **domaine vital** désigne l'espace utilisé habituellement par un individu ou un groupe ; avec des observations opportunistes, on n'en obtient qu'une approximation, appelée ici **zones de concentration des observations**.
+Le projet Delfinu, co-porté par les parcs naturels marins du Cap Corse et de l'Agriate et d'Iroise, vise à comprendre et réduire les pressions humaines sur les grands dauphins (*Tursiops truncatus*) résidents. Sa première étape est d'**étudier le domaine vital de l'espèce dans le Parc à partir des données existantes**. Le domaine vital désigne l'espace utilisé habituellement par un individu ou un groupe pour ses activités (alimentation, repos, reproduction).
+
+Cet exercice en propose une version exploratoire, entièrement reproductible, fondée sur des données publiques. Il répond à trois questions :
+
+1. **Où** les grands dauphins sont-ils observés dans le Parc, et quelle surface couvre leur domaine vital ?
+2. **Dans quel habitat** : les zones fréquentées diffèrent-elles du milieu disponible par la profondeur ou la distance à la côte ?
+3. **Quel chevauchement avec le trafic maritime** : la densité de navires est-elle plus forte dans le domaine vital que dans le reste du Parc ?
 
 ## Données et méthodes
-
-### Données
 
 | Donnée | Source | Caractéristiques |
 |---|---|---|
 | Observations de *Tursiops truncatus* | Portails OBIS et GBIF (téléchargement automatisé sous R) | Données de présence, standard Darwin Core |
 | Bathymétrie | NOAA ETOPO 2022 | Résolution d'environ `r fmt(round(res$resolution_bathy_m, -1))` m |
 | Périmètre du Parc | PatriNat, base des espaces protégés (07/2026) | Polygone officiel |
-| Densité de navires | EMODnet Human Activities | Données AIS, moyenne annuelle 2023, grille de 1 km ; tous navires, plaisance, voile, passagers |
+| Densité de navires | EMODnet Human Activities | Données AIS, moyenne annuelle 2023, grille de 1 km ; tous navires, plaisance, pêche |
 
-Toutes les couches sont projetées en **Lambert-93 (EPSG:2154)**, système métrique nécessaire au calcul des surfaces et des distances.
+Toutes les couches sont projetées en **Lambert-93 (EPSG:2154)**, système métrique nécessaire au calcul des surfaces et des distances. La distance à la côte est calculée sous R à partir du trait de côte dérivé de la bathymétrie.
 
-### Nettoyage et contrôle qualité
-
-Les portails publics rassemblent des sources hétérogènes : le but est de ne garder que des observations fiables de dauphins vivants en mer. Les enregistrements des deux portails ont été harmonisés puis filtrés (échouages, doublons, dates antérieures à 2000, précision supérieure à 5 km, points à terre, agrégation à une observation par km² et par jour) ; chaque étape et ses effectifs sont donnés en annexe 1. L'examen des données a en outre révélé deux défauts, désormais filtrés automatiquement :
-
-- **Positions ramenées sur une grille** (`r fmt(n_grille)` enregistrements) : un jeu ancien place ses observations au centre d'un quadrillage régulier de 5 minutes d'arc, jusqu'à 24 sur un même point, alors que la précision déclarée est de 50 m.
-- **Doublons imprécis** (`r fmt(n_flou)` enregistrements) : la plupart des enregistrements d'un inventaire national, déclarés avec une précision de 5 km, ont un équivalent le même jour, à quelques kilomètres, dans un autre jeu plus précis ; il s'agit probablement des mêmes observations, republiées avec une localisation moins précise. Une donnée de précision égale ou supérieure à 5 km est retirée lorsqu'un autre jeu donne, le même jour et à moins de 10 km, une position plus précise.
-
-Au total, **`r fmt(res$n_parc)` observations** sont retenues dans le Parc, de `r res$annees[1]` à `r res$annees[2]`.
+**Bancarisation.** Les enregistrements des deux portails ont été harmonisés (colonnes communes, dictionnaire de données) puis filtrés, chaque étape étant tracée dans un journal. Sur `r fmt(j$n_restant[1])` enregistrements bruts, `r fmt(pct_ecartes)` % ont été écartés : `r fmt(retire("chouage"))` échouages (animaux morts sur la côte), `r fmt(retire("Doublons"))` doublons entre portails (même position à 100 m près et même date), `r fmt(retire("Date"))` observations antérieures à 2000 ou non datées, `r fmt(retire("Précision"))` localisations trop imprécises (incertitude > 5 km), `r fmt(retire("terre"))` points à terre, `r fmt(retire("Agrégation"))` positions répétées d'un même groupe le même jour (agrégation à une observation par km² et par jour, pour limiter la pseudo-réplication) et `r fmt(retire("dans le Parc"))` observations hors du Parc. **`r fmt(res$n_parc)` observations** sont retenues, de `r res$annees[1]` à `r res$annees[2]`.
 
 ::: {.content-visible when-format="html"}
 ```{r}
@@ -217,246 +142,164 @@ knitr::kable(res$journal, col.names = c("Étape", "Observations restantes"))
 ```
 :::
 
-### Zones de concentration des observations
+**Domaine vital.** Le domaine vital est estimé par la **méthode des noyaux** (*kernel density estimation*, KDE) : un noyau gaussien est centré sur chaque observation, et la somme des noyaux donne une surface continue de densité d'utilisation. La largeur du noyau est la **largeur de bande de référence** *h* ref = σ × n^−1/6^, où σ est l'écart-type moyen des coordonnées et n le nombre d'observations, soit *h* ref = `r fmt(res$href_km, 1)` km. Les **isoplèthes** 50 % (cœur du domaine vital) et 95 % (domaine vital) délimitent les plus petites surfaces contenant respectivement 50 % et 95 % de la densité. Elles sont comparées à un **polygone convexe minimum** (MCP 95 %), enveloppe des 95 % d'observations les plus proches du centre. Cette méthode (Worton, 1989) requiert un effectif suffisant : avec `r fmt(res$n_parc)` observations, l'échantillon dépasse le minimum d'une trentaine de localisations, et idéalement une cinquantaine, recommandé par Seaman et al. (1999). La largeur de bande de référence ayant tendance à surlisser la densité, une **analyse de sensibilité** recalcule le domaine vital avec une largeur de bande réduite de moitié.
 
-Le but est de repérer où les observations sont regroupées. Leur densité est estimée par la **méthode des noyaux** (KDE ; Worton, 1989) : un noyau gaussien est centré sur chaque observation, et la somme des noyaux donne une surface de densité. La largeur des noyaux, ou **largeur de bande** *h*, fixe le lissage ; elle est calculée par la formule de référence $h_{\text{ref}} = \sigma \, n^{-1/6}$, à partir de la dispersion des positions ($\sigma$) et de leur nombre ($n$). Les **isoplèthes** 50 % (zone centrale) et 95 % (zone étendue) délimitent les plus petites surfaces contenant 50 % et 95 % de la densité. Elles décrivent la densité des observations, qui dépend aussi de la répartition des observateurs.
+**Habitat.** L'habitat utilisé est comparé au milieu disponible selon un plan **utilisation / disponibilité** (Manly et al., 2002) : `r fmt(res$n_parc)` observations contre `r fmt(h_dis$n)` points tirés aléatoirement dans la partie marine du Parc (10 par observation). La profondeur et la distance à la côte des deux groupes sont comparées par des **tests de Wilcoxon** (test non paramétrique, adapté à des distributions asymétriques). Une **régression logistique** (présence = 1, disponibilité = 0) estime ensuite l'effet de la profondeur, transformée en logarithme puis centrée-réduite. La corrélation de Spearman entre profondeur et distance à la côte (ρ = `r fmt(rho, 2)`) `r if (modele_simple) "dépassant 0,7 en valeur absolue, seule la profondeur est conservée dans le modèle pour éviter la colinéarité" else "étant inférieure à 0,7, les deux variables sont conservées dans le modèle"`.
 
-**Estimation par secteur.** Sur l'ensemble du Parc, la formule donne *h* = `r fmt(res$href_km, 1)` km et une zone étendue couvrant `r fmt(g95$part_du_parc_pct)` % du Parc : les observations forment deux concentrations, et l'écart entre elles augmente *h*, ce qui lisse exagérément la densité (Worton, 1989). L'estimation a donc été refaite séparément dans deux secteurs correspondant aux groupes décrits par les suivis (Couet et al., 2021 ; Buanic, 2021, 2022), « Archipel de Molène – Le Conquet » et « Chaussée de Sein – Raz de Sein », *h* étant recalculée dans chacun ; les `r fmt(res$n_hors_secteur)` observations situées hors des secteurs ne sont pas utilisées pour cette estimation (elles le sont pour l'habitat). Les deux concentrations apparaissent dès l'estimation sur tout le Parc ; mais les secteurs ayant été tracés d'après les groupes connus, la correspondance avec ces groupes n'est pas une validation indépendante.
-
-**Tests de sensibilité.** Deux choix d'analyse ont été testés : les limites des secteurs, réduites puis élargies de 5 km, et la largeur de bande, divisée par deux (*h*/2), la formule de référence ayant tendance à surlisser.
-
-### Habitat
-
-Le but est de vérifier si les observations se situent dans un milieu particulier, par exemple des fonds peu profonds proches de la côte, comme le laisse attendre le caractère côtier des groupes résidents, ou simplement là où il y a de la mer. L'habitat utilisé est comparé au milieu disponible selon un plan **utilisation / disponibilité** (Manly et al., 2002) : les `r fmt(res$n_parc)` observations du Parc contre `r fmt(h_dis$n)` points tirés aléatoirement dans sa partie marine (10 par observation). La **profondeur** désigne ici la hauteur d'eau au point d'observation, c'est-à-dire la profondeur du fond lue sur la bathymétrie, et non la profondeur à laquelle nage l'animal, qui est observé en surface. La profondeur et la distance à la côte sont comparées par des **tests de Wilcoxon-Mann-Whitney** (comparaison des rangs des deux groupes, sans hypothèse de loi normale), puis une **régression logistique** (présence = 1, disponibilité = 0) estime l'effet de la profondeur, transformée en logarithme puis centrée-réduite. La corrélation de Spearman entre profondeur et distance à la côte (ρ = `r fmt(rho, 2)`) `r if (modele_simple) "dépassant 0,7 en valeur absolue, une seule des deux variables est conservée dans le modèle. La profondeur a été retenue : c'est la variable la plus utilisée pour décrire l'habitat de l'espèce, et elle ajuste mieux les données (AIC de 579 contre 631 pour un modèle avec la seule distance à la côte, dont le rapport de cotes, 0,36, va dans le même sens)" else "étant inférieure à 0,7, les deux variables sont conservées dans le modèle"`.
-
-### Trafic maritime
-
-L'objectif est descriptif : identifier les catégories de navires présentes dans les zones de concentration et situer ce chevauchement par rapport au reste du Parc, sans rechercher de relation de cause à effet. La comparaison avec le reste du Parc sert à repérer ce qui est propre à ces zones, non à mesurer une exposition. EMODnet calcule, pour chaque cellule de 1 km², le temps cumulé de présence des navires (en heures par km² et par mois, moyenne de 2023). Seuls sont comptés les navires équipés de l'AIS, le système d'identification automatique qui transmet leur position et n'est obligatoire que pour une partie d'entre eux. Comme dans la mission décrite pour le poste, la pêche professionnelle est exclue des catégories analysées ; la catégorie « tous navires » l'inclut cependant. La **densité médiane** est comparée entre les zones centrales, les zones étendues (entre les isoplèthes 50 % et 95 %) et le reste du Parc. Ces comparaisons sont descriptives : les cellules voisines n'étant pas indépendantes, aucun test statistique n'est appliqué.
-
-**Contrôle de la proximité de la côte.** Les zones centrales sont côtières, et le trafic est en général plus dense près des côtes : l'écart avec le reste du Parc, majoritairement situé au large, peut donc tenir à cette seule proximité. Les zones centrales sont aussi comparées à la seule partie du reste du Parc située à une distance de la côte comparable, c'est-à-dire pas plus loin que 90 % des cellules des zones centrales. Ce seuil est un choix ; sa sensibilité n'a pas été testée.
+**Pressions.** EMODnet reconstitue les trajectoires des navires équipés de l'AIS et calcule, pour chaque cellule de 1 km², le temps cumulé de présence des navires (en heures par km² et par mois, moyenne des 12 mois de 2023). Les catégories reposent sur le type de navire déclaré dans le message AIS : « plaisance » correspond à la catégorie *Pleasure craft* (les voiliers, catégorie *Sailing*, n'y sont pas inclus) et « pêche » à la catégorie *Fishing*. Cette densité est comparée entre trois zones : le cœur du domaine vital, l'anneau compris entre les isoplèthes 50 % et 95 %, et le reste du Parc. La **médiane** est retenue comme mesure principale car elle est peu sensible aux valeurs extrêmes (ports). En l'absence de seuil de référence reliant une densité de navires à un dérangement, les **zones de fort trafic** sont définies de façon relative : ce sont les cellules dont la densité dépasse le troisième quartile des cellules du Parc (soit les 25 % les plus fréquentées), seuil recalculé pour chaque catégorie de navires. Leur part située dans le domaine vital est comparée à la part de surface qu'il occupe : si ces cellules étaient réparties indépendamment du domaine vital, les deux parts seraient égales. L'indicateur n'est pas calculé lorsque plus de la moitié des cellules ont une densité nulle, le seuil n'ayant alors pas de sens. Sa sensibilité au choix du seuil est testée avec la médiane (50 % des cellules les plus fréquentées) et le 9^e^ décile (10 %).
 
 ## Résultats
 
-### Localisation des zones de concentration
+### Domaine vital
 
-```{r}
-#| label: tbl-secteurs
-#| tbl-cap: "Estimation par secteur : effectifs et surfaces des isoplèthes"
-tab <- data.frame(
-  Secteur = so$secteur,
-  Obs = so$n_obs,
-  Periode = paste0(so$annee_min, "–", so$annee_max),
-  h = fmt(so$href_km, 1),
-  Z50 = sapply(so$secteur, function(s) fmt(val(s, 1, "KDE 50 %"))),
-  Z95 = sapply(so$secteur, function(s) fmt(val(s, 1, "KDE 95 %"))),
-  Z50b = sapply(so$secteur, function(s) fmt(val(s, 0.5, "KDE 50 %"))),
-  check.names = FALSE)
-knitr::kable(tab, align = "lrcrrrr", row.names = FALSE,
-  col.names = c("Secteur", "n", "Période", "h", "Centrale", "Étendue", "Centrale (h/2)"))
-```
+Le **cœur du domaine vital (KDE 50 %) couvre `r fmt(s50$surface_km2)` km²**, soit `r fmt(s50$part_du_parc_pct, 1)` % de la partie marine du Parc, et le **domaine vital à 95 % couvre `r fmt(s95$surface_km2)` km²** (`r fmt(s95$part_du_parc_pct, 1)` %). Le MCP 95 % donne `r fmt(smcp$surface_km2)` km².
 
-*n = nombre d'observations ; h = largeur de bande (km) ; Centrale et Étendue = surfaces des isoplèthes 50 % et 95 % (km²) ; Centrale (h/2) = isoplèthe 50 % avec une largeur de bande divisée par deux.*
+![Domaine vital estimé (noyau, isoplèthes 50 % et 95 %)](outputs/figures/carte_domaine_vital.png){#fig-carte width=72%}
 
-Estimée secteur par secteur (@tbl-secteurs, @fig-carte), la zone centrale mesure **`r fmt(val("Molène", 1, "KDE 50 %"))` km² à Molène** et **`r fmt(val("Sein", 1, "KDE 50 %"))` km² à Sein**, contre `r fmt(g50$surface_km2)` km² pour l'estimation unique sur l'ensemble du Parc. La zone centrale de Molène est centrée entre l'est de l'archipel et Le Conquet (`r fmt(abs(ctr("Molène", "centre_lon")), 2)`° O ; `r fmt(ctr("Molène", "centre_lat"), 2)`° N) ; celle de Sein est centrée sur l'île (`r fmt(abs(ctr("Sein", "centre_lon")), 2)`° O ; `r fmt(ctr("Sein", "centre_lat"), 2)`° N). Avec `r info("Sein", "n_obs")` observations, l'estimation pour Sein reste indicative (@fig-sein). Avec une largeur de bande divisée par deux, la zone centrale est plus petite (`r fmt(val("Molène", 0.5, "KDE 50 %"))` km² à Molène, `r fmt(val("Sein", 0.5, "KDE 50 %"))` km² à Sein) mais reste au même endroit, à l'intérieur de celle obtenue avec *h* ; à Molène, une petite zone supplémentaire apparaît aussi à l'est d'Ouessant.
+*Lecture* : fond bleu clair = faibles profondeurs, bleu foncé = grands fonds ; ligne grise = isobathe 200 m (limite du plateau continental) ; points blancs = observations analysées ; contour rouge = isoplèthe 50 % ; contour orange = isoplèthe 95 %.
 
-![Zones de concentration des observations, estimées dans chaque secteur](outputs/figures/carte_domaine_vital.png){#fig-carte width=80%}
+Le cœur du domaine vital est situé dans le **golfe de Saint-Florent**. L'isoplèthe 95 % s'étend le long de la **côte ouest du Cap Corse**, globalement au-dessus de l'isobathe 200 m. Les petits contours isolés au large correspondent chacun à une à trois observations : ils traduisent la présence de points isolés plutôt que des zones d'utilisation régulière.
 
-![Secteur Chaussée de Sein – Raz de Sein : la zone centrale est centrée sur l'île, et presque aucune observation ne provient de la partie ouest de la chaussée, vers le phare d'Ar Men](outputs/figures/carte_secteur_sein.png){#fig-sein width=72%}
-
-*La carte détaillée du secteur de Molène et les figures de sensibilité au découpage sont disponibles dans le dépôt du projet.*
-
-**Sensibilité au découpage.** Lorsque les secteurs sont réduits de 5 km, la zone centrale obtenue est comprise à `r fmt(sens("Molène", -1, "part_dans_reference_pct"), 1)` % (Molène) et `r fmt(sens("Sein", -1, "part_dans_reference_pct"), 1)` % (Sein) dans celle de l'analyse principale ; lorsqu'ils sont élargis de 5 km, elle recouvre `r fmt(sens("Molène", 1, "part_reference_couverte_pct"), 1)` % et `r fmt(sens("Sein", 1, "part_reference_couverte_pct"), 1)` % de celle-ci. Les zones sont donc emboîtées : **leur localisation ne dépend pas du découpage**. Leur surface en dépend en revanche fortement — de `r fmt(sens("Molène", -1, "surface_centrale_km2"))` à `r fmt(sens("Molène", 1, "surface_centrale_km2"))` km² pour Molène, de `r fmt(sens("Sein", -1, "surface_centrale_km2"))` à `r fmt(sens("Sein", 1, "surface_centrale_km2"))` km² pour Sein —, car élargir un secteur y fait entrer quelques observations éloignées qui augmentent la largeur de bande (de `r fmt(info("Sein", "href_km"), 1)` à `r fmt(sens("Sein", 1, "h_km"), 1)` km pour Sein). Avec le secteur élargi, une petite zone centrale supplémentaire apparaît aussi à l'est d'Ouessant.
+`r if (sens_ok) paste0("**Sensibilité.** Avec une largeur de bande réduite de moitié (", fmt(sens$h_km, 1), " km), le cœur du domaine vital couvre ", fmt(sens$surface_coeur_km2), " km² et le domaine vital à 95 % ", fmt(sens$surface_dv95_km2), " km² ; ", fmt(sens$part_coeur_dans_reference_pct), " % de ce cœur est situé dans le cœur de référence. ", if (sens$part_coeur_dans_reference_pct >= 80) "La localisation du cœur dans le golfe de Saint-Florent est donc robuste au choix de la largeur de bande ; seules les surfaces en dépendent." else "La localisation du cœur dépend en partie du choix de la largeur de bande : les contours sont à interpréter avec prudence.") else ""`
 
 ### Habitat
 
-Sous les observations, le fond se trouve (@fig-habitat) à une profondeur médiane de **`r fmt(h_obs$prof_mediane_m, 1)` m** (intervalle interquartile : `r fmt(h_obs$prof_q25)`–`r fmt(h_obs$prof_q75)` m) contre `r fmt(h_dis$prof_mediane_m, 1)` m pour le milieu disponible (`r fmt(h_dis$prof_q25)`–`r fmt(h_dis$prof_q75)` m ; Wilcoxon, p `r fp(res$test_prof$p.value)`). Les observations sont situées à une distance médiane de **`r fmt(h_obs$dist_mediane_km, 1)` km de la côte**, contre `r fmt(h_dis$dist_mediane_km, 1)` km (p `r fp(res$test_dist$p.value)`). Dans le modèle logistique, le **rapport de cotes** associé à la profondeur est de **`r fmt(or_prof$odds_ratio, 2)`** (IC 95 % : `r fmt(or_prof$ic95_bas, 2)`–`r fmt(or_prof$ic95_haut, 2)`) pour une augmentation d'un écart-type du logarithme de la profondeur : la cote d'observation diminue lorsque la profondeur augmente.
+Les observations se situent à une profondeur médiane de **`r fmt(h_obs$prof_mediane_m)` m** (intervalle interquartile : `r fmt(h_obs$prof_q25)`–`r fmt(h_obs$prof_q75)` m) contre `r fmt(h_dis$prof_mediane_m)` m pour le milieu disponible (`r fmt(h_dis$prof_q25)`–`r fmt(h_dis$prof_q75)` m ; Wilcoxon, p `r fp(res$test_prof$p.value)`), et à **`r fmt(h_obs$dist_mediane_km, 1)` km de la côte** contre `r fmt(h_dis$dist_mediane_km, 1)` km (p `r fp(res$test_dist$p.value)`).
 
-**Interprétation.** Il s'agit d'une association entre la profondeur et la répartition des observations, et non d'une mesure de sélection de l'habitat. La profondeur étant très corrélée à la distance à la côte, ce coefficient traduit aussi l'effet de la proximité de la côte. Surtout, le milieu disponible est tiré dans tout le Parc, alors que l'effort d'observation ne l'est pas : les jeux opportunistes sont concentrés dans les eaux peu profondes proches de la côte (profondeurs médianes de 6 à 20 m selon le jeu). Une partie de l'écart traduit donc la répartition des observateurs plutôt qu'une préférence des dauphins. Enfin, les observations voisines n'étant pas indépendantes, les p-values et l'intervalle de confiance sont optimistes.
+Dans le modèle logistique, le **rapport de cotes** associé à la profondeur est de **`r fmt(or_prof$odds_ratio, 2)`** (IC 95 % : `r fmt(or_prof$ic95_bas, 2)`–`r fmt(or_prof$ic95_haut, 2)`) : la cote d'observation est divisée par environ `r fmt(1 / or_prof$odds_ratio, 0)` lorsque la profondeur (en logarithme) augmente d'un écart-type. L'intervalle de confiance n'inclut pas 1, ce qui indique un effet net. L'ordonnée à l'origine n'est pas interprétable comme une probabilité de présence, car elle dépend du rapport arbitraire entre points de disponibilité et observations.
 
-![Profondeur et distance à la côte : observations et milieu disponible](outputs/figures/habitat_profondeur_cote.png){#fig-habitat width=66%}
+![Habitat utilisé et milieu disponible](outputs/figures/habitat_profondeur_cote.png){#fig-habitat width=66%}
 
-*Lecture* : chaque violon représente la distribution des valeurs (plus il est large, plus les valeurs sont fréquentes) ; la boîte indique la médiane et l'intervalle interquartile ; axes en racine carrée.
+*Lecture* : chaque diagramme en violon représente la distribution des valeurs (plus il est large, plus les valeurs sont fréquentes) ; la boîte indique la médiane (trait épais) et l'intervalle interquartile ; rouge = observations, bleu = milieu disponible ; axes en racine carrée.
+
+Les distributions ne se recouvrent presque pas : les observations sont concentrées entre 50 et 100 m de profondeur et à moins de 5 km de la côte, tandis que le milieu disponible est dominé par des fonds de plus de 1 000 m.
 
 ```{r}
 #| label: trafic
 #| output: asis
 if (trafic_ok) {
   cat("### Trafic maritime\n\n")
-  cats <- list(c("tous", "Tous navires*"), c("plaisance", "Plaisance"), c("voile", "Voile"), c("passager", "Passagers"))
+
+  # Tableau de synthèse par catégorie de navires
+  cats <- list(c("tous", "Tous navires"), c("plaisance", "Plaisance"), c("peche", "Pêche"))
   lignes <- lapply(cats, function(cc) {
-    d <- tr[grepl(cc[1], tr$couche), ]
+    d <- res$trafic[grepl(cc[1], res$trafic$couche), ]
     if (nrow(d) == 0) return(NULL)
     m <- function(z) d$trafic_median[d$zone == z][1]
-    mc <- m(Z1); ma <- m(Z2); mr <- m(Z3)
-    data.frame(Categorie = cc[2], Centrale = fmt(mc, 2), Etendue = fmt(ma, 2), Reste = fmt(mr, 2),
-               Rapport = if (isTRUE(mr > 0)) paste0("× ", fmt(mc / mr, 1)) else "–",
-               check.names = FALSE)
+    mc <- m("Cœur (KDE 50 %)"); ma <- m("Domaine vital (50-95 %)"); mr <- m("Reste du Parc")
+    pf <- d$part_fort_trafic_dans_dv_pct[1]
+    sf <- if ("seuil_fort_trafic" %in% names(d)) d$seuil_fort_trafic[1] else NA
+    data.frame(
+      Categorie = cc[2],
+      Coeur  = fmt(mc, 2), Anneau = fmt(ma, 2), Reste = fmt(mr, 2),
+      Rapport = if (isTRUE(mr > 0)) paste0("× ", fmt(mc / mr, 1)) else "–",
+      Seuil = if (is.na(pf) || is.na(sf)) "–" else fmt(sf, 2),
+      Fort = if (is.na(pf)) "non interprétable" else paste0(fmt(pf, 1), " %"),
+      check.names = FALSE)
   })
-  print(knitr::kable(do.call(rbind, lignes), align = "lrrrr", row.names = FALSE,
-    col.names = c("Catégorie", "Centrale", "Étendue", "Reste", "Rapport")))
-  cat("\n: Densité médiane de navires par zone {#tbl-trafic}\n", sep = "")
-  cat("\n\n*Centrale, Étendue, Reste = densités médianes dans les zones centrales, les zones étendues et le reste du Parc, ",
-      "en heures de présence de navires par km² et par mois (AIS, 2023) ; Rapport = centrale / reste. ",
-      "\\* Tous navires : pêche professionnelle incluse.*\n\n", sep = "")
+  tab <- do.call(rbind, lignes)
+  print(knitr::kable(tab, align = "lrrrrrr",
+    col.names = c("Catégorie", "Cœur", "Anneau", "Reste", "Cœur / reste", "Seuil", "Fort trafic dans le DV")))
+  cat("\n\n*Cœur = isoplèthe 50 % ; Anneau = entre les isoplèthes 50 % et 95 % ; Reste = reste du Parc ; ",
+      "Fort trafic dans le DV = part des cellules de fort trafic situées dans le domaine vital à 95 %. ",
+      "Densités médianes et seuils en heures de présence de navires par km² et par mois (AIS, 2023). ",
+      "Le seuil de fort trafic est le 3e quartile des cellules du Parc, calculé pour chaque catégorie. ",
+      "Le domaine vital à 95 % couvre ", fmt(part_surf, 1), " % de la surface du Parc : une part de cellules de fort trafic ",
+      "supérieure à cette valeur indique une surreprésentation. Pour la pêche, la majorité des cellules ont une densité nulle : ",
+      "le seuil n'a pas de sens et l'indicateur n'est pas calculé.*\n\n", sep = "")
 
-  if (cot_ok) {
-    lignes_c <- lapply(cats, function(cc) {
-      l <- tc[grepl(cc[1], tc$couche), ][1, ]
-      if (is.na(l$couche)) return(NULL)
-      data.frame(Categorie = cc[2], Cotier = sub(".", ",", formatC(signif(l$median_reste_cotier, 2), digits = 2, format = "fg", flag = "#"), fixed = TRUE),
-                 R2 = paste0("× ", fmt(l$median_centrale / l$median_reste_cotier, 1)),
-                 check.names = FALSE)
-    })
-    print(knitr::kable(do.call(rbind, lignes_c), align = "lrr", row.names = FALSE,
-      col.names = c("Catégorie", "Reste côtier", "Centrale / reste côtier")))
-    cat("\n: Contrôle de la proximité de la côte {#tbl-cote}\n", sep = "")
-    cat("\n\n*Densités médianes (heures par km² et par mois). Reste côtier = cellules du reste du Parc situées à moins de ",
-        fmt(tc$dist_max_km[1], 1), " km de la côte (", fmt(tc$n_cellules_reste_cotier[1]), " cellules). ",
-        "Rapport à comparer à la colonne « Rapport » du @tbl-trafic ; un rapport inférieur à 1 indique des zones centrales moins fréquentées que le reste de la bande côtière.*\n\n", sep = "")
+  cat("![Densité de navires (AIS, tous navires, 2023) et domaine vital](outputs/figures/carte_trafic.png){#fig-trafic width=70%}\n\n")
+  cat("*Lecture* : densité de navires équipés de l'AIS, toutes catégories confondues, en échelle logarithmique ",
+      "(chaque palier de la légende correspond à un facteur 10) ; contours turquoise = isoplèthes 50 % et 95 %.\n\n", sep = "")
+  cat("![Densité de navires par zone et par catégorie](outputs/figures/trafic_par_zone.png){#fig-zones width=72%}\n\n")
+  cat("*Lecture* : une boîte par zone et par catégorie de navires ; chaque boîte résume les valeurs des cellules de 1 km² ",
+      "(trait épais = médiane) ; points = cellules aux valeurs extrêmes (ports, couloirs) ; échelle logarithmique.\n\n", sep = "")
+
+  cat("**Interprétation des résultats de trafic :**\n\n")
+  cat("- **Tous navires** : la densité médiane est ", fmt(r_tous, 1), " fois plus élevée dans le cœur du domaine vital ",
+      "que dans le reste du Parc, alors que l'anneau 50–95 % présente une densité comparable au reste du Parc. ",
+      "Le surcroît de trafic est donc localisé dans le cœur, au contact du port de Saint-Florent ; ",
+      "la carte montre par ailleurs des couloirs de navigation rectilignes qui traversent le Parc au large.\n", sep = "")
+  cat("- **Plaisance** : c'est la catégorie pour laquelle le contraste est le plus marqué (× ", fmt(r_plai, 1),
+      ") et les zones de fort trafic les plus surreprésentées dans le domaine vital (", fmt(part_fort_plai, 1),
+      " % pour ", fmt(part_surf, 1), " % de la surface). Ce chevauchement est vraisemblablement sous-estimé : ",
+      "la plupart des bateaux de plaisance ne sont pas équipés de l'AIS et les voiliers ne sont pas inclus dans cette catégorie.\n", sep = "")
+  cat("- **Pêche** : les densités sont quasi nulles dans les trois zones, si bien que l'indicateur de fort trafic n'est pas interprétable. ",
+      "Ce résultat reflète l'absence d'AIS sur les petites unités de pêche artisanale plutôt qu'une absence d'activité, ",
+      "et ne permet pas de conclure.\n", sep = "")
+  if (all(c("part_fort_q50_dans_dv_pct", "part_fort_q90_dans_dv_pct") %in% names(ligne_tous))) {
+    cat("- **Choix du seuil** : le seuil du 3e quartile est conventionnel. Avec les autres seuils testés, la part des cellules ",
+        "de fort trafic situées dans le domaine vital (pour ", fmt(part_surf, 1), " % de la surface) est de ",
+        fmt(ligne_tous$part_fort_q50_dans_dv_pct, 1), " % (50 % des cellules les plus fréquentées) et de ",
+        fmt(ligne_tous$part_fort_q90_dans_dv_pct, 1), " % (10 %) pour l'ensemble des navires, et de ",
+        fmt(ligne_plai$part_fort_q50_dans_dv_pct, 1), " % et ", fmt(ligne_plai$part_fort_q90_dans_dv_pct, 1),
+        " % pour la plaisance.", sep = "")
+    croissant <- ligne_tous$part_fort_q90_dans_dv_pct > part_fort &&
+                 part_fort > ligne_tous$part_fort_q50_dans_dv_pct
+    if (isTRUE(croissant)) {
+      cat(" La surreprésentation augmente avec la sévérité du seuil : plus les cellules sont fréquentées, ",
+          "plus elles sont proportionnellement situées dans le domaine vital. La conclusion ne dépend donc pas ",
+          "du seuil retenu ; elle est même plus marquée pour les secteurs de trafic le plus intense.", sep = "")
+    }
+    cat("\n")
   }
-
-  cat("![Densité de navires par catégorie (plaisance, voile, navires à passagers ; AIS, 2023) et zones de concentration des observations](outputs/figures/carte_trafic_categories.png){#fig-trafic width=100%}\n\n")
-
-  cat("**Lecture des résultats :**\n\n")
-  cat("- **Sans contrôle** (@tbl-trafic) : pour les quatre catégories, la densité médiane décroît des zones centrales vers les zones étendues, ",
-      "puis vers le reste du Parc ; l'écart est le plus marqué pour la plaisance (× ", fmt(med("plaisance", Z1) / med("plaisance", Z3), 1),
-      ") et la voile (× ", fmt(med("voile", Z1) / med("voile", Z3), 1), "). Mais les zones centrales sont côtières, alors que le reste du Parc ",
-      "est surtout situé au large, où le trafic est plus faible.\n", sep = "")
-  if (cot_ok) {
-    cat("- **Avec le contrôle de la proximité de la côte** (@tbl-cote) : ",
-        if (isTRUE(inverse))
-          paste0("l'écart **s'inverse** pour la plaisance, la voile et l'ensemble des navires. À distance de la côte comparable, les zones centrales sont ",
-                 "moins fréquentées que le reste de la bande côtière, très fréquentée par la plaisance et la voile entre Le Conquet et Camaret, le long de la presqu'île de Crozon et en baie de Douarnenez (@fig-trafic). ",
-                 "Le contraste précédent tient donc à la proximité de la côte, et non à une fréquentation particulière des zones de concentration. ",
-                 "Seuls les navires à passagers y restent nettement plus présents (× ", fmt(rap_cot("passager"), 1),
-                 ") : ce rapport, calculé sur une densité de référence proche de zéro, est très sensible à cette valeur et indique seulement une présence nettement plus marquée, non l'intensité d'un effet. Le panneau « Passagers » de la @fig-trafic montre une route nette entre la côte du Conquet et Ouessant, qui traverse la zone centrale de Molène, et une liaison moins marquée vers Sein. ",
-                 "C'est le principal résultat de cette partie. Cette comparaison relative ne dit pas que le trafic y est faible : les trois catégories sont présentes dans les zones de concentration, et c'est le trafic effectivement rencontré par les dauphins, plus que l'écart avec le reste de la côte, qui compterait pour évaluer une exposition.\n")
-        else if (min(rap_cot("plaisance"), rap_cot("voile"), rap_cot("passager")) > 1.5)
-          "un écart subsiste : il ne s'explique donc pas par la seule distance à la côte.\n"
-        else
-          "l'écart se réduit nettement : une grande partie du contraste tient à la proximité de la côte.\n", sep = "")
-  }
-  cat("- **Portée** : ces résultats décrivent un **chevauchement spatial** entre les observations et le trafic. ",
-      "Les densités ne renseignent ni sur la distance entre navires et animaux, ni sur la vitesse, le bruit ou les réactions, et ne mesurent ni interaction ni impact. ",
-      "Les observations opportunistes étant concentrées dans les eaux côtières, là où circulent aussi les navires, une partie du recouvrement ",
-      "peut venir de l'effort d'observation lui-même.\n\n", sep = "")
+  cat("- **Portée** : ces résultats décrivent une **exposition potentielle** des grands dauphins au trafic côtier, ",
+      "en particulier à la plaisance. Ils ne mesurent ni interaction ni impact, et le chevauchement est en partie ",
+      "lié au fait que de nombreuses observations sont réalisées depuis des bateaux.\n\n", sep = "")
 } else {
   cat("*La partie « pressions » n'a pas été calculée : aucun raster de trafic fourni.*\n\n")
 }
 ```
 
-### Bancarisation et requêtes
+## Interprétation
 
-À titre de démonstration, les observations nettoyées, le périmètre du Parc et les zones estimées ont été versés dans une base **PostgreSQL / PostGIS**, consultable dans QGIS, pour illustrer leur bancarisation sous une forme interrogeable en SQL. Quelques requêtes SQL vérifient que la base redonne les résultats de l'analyse R (102 observations dans le Parc, mêmes surfaces, aucun doublon résiduel).
-
-## Comparaison avec les suivis existants
-
-Les suivis par photo-identification décrivent deux groupes côtiers résidents : 68 à 100 individus à Molène de 2014 à 2019 et 139 en 2020, estimation jugée à interpréter avec prudence (Couet et al., 2021) ; 34 à 41 individus identifiés à Sein en 2020–2021, caractérisés par « la petite taille de leur domaine vital » et « leur fidélité à certains secteurs bien identifiés » (Buanic, 2021, 2022). En 2021, un groupe inconnu, sans doute de passage (« transients »), a aussi été rencontré à deux reprises vers le phare d'Ar Men, à l'ouest de la chaussée, secteur que le compte rendu recommande de prospecter plus régulièrement (Buanic, 2022). La comparaison porte sur la localisation.
-
-- **Concordance** : les deux zones correspondent aux deux groupes connus ; celle de Molène, entre l'est de l'archipel et Le Conquet, est compatible avec le suivi.
-- **Sein** : la zone centrale est centrée sur l'île (@fig-sein), ce qui est cohérent avec un domaine vital de petite taille. Les données publiques ne comptent presque aucune observation sur l'ouest de la chaussée, vers Ar Men, secteur où un groupe sans doute de passage a été rencontré en 2021 : la répartition des observations publiques reflète aussi celle des observateurs, plus nombreux près du port (`r fmt(info("Sein", "part_inaturalist_pct"))` % des observations du secteur proviennent d'iNaturalist).
-- **Au large** : une partie des observations, notamment celles du survol aérien de 2010, peuvent concerner des dauphins de passage ou du large, génétiquement distincts des côtiers (Louis et al., 2014) ; les données ne permettent pas de les distinguer.
+La concentration des observations sur le plateau continental et près des côtes est cohérente avec le caractère côtier des grands dauphins de Méditerranée. Les suivis du programme GDEGeM ont par ailleurs montré que la Corse présente le taux de rencontre de l'espèce le plus élevé de la façade méditerranéenne française (Labach et al., 2015, 2022). Ces résultats rejoignent aussi le constat à l'origine du site Natura 2000 « Grands dauphins de l'Agriate », qui identifie le secteur du Cap Corse et de l'Agriate comme l'une des deux zones de concentration de l'espèce en Corse (MNHN, 2019). `r if (trafic_ok) "Le cœur du domaine vital correspond aussi à l'un des secteurs les plus fréquentés du Parc, ce qui justifie de s'intéresser aux activités nautiques côtières, et en particulier à la plaisance." else ""`
 
 ## Limites
 
-- **Effort d'observation inconnu** : les observations proviennent de jeux hétérogènes (`r fmt(pct_jeu1)` % issues du jeu « `r nom_jeu1` »), opportunistes ou protocolés, sans information publiée sur l'effort de prospection. Les contours reflètent autant la répartition des observateurs que l'usage réel de l'espace ; les analyser par type de données, ou en excluant successivement les principales sources, permettrait d'en mesurer l'effet.
-- **Surfaces peu robustes** : selon le découpage des secteurs et la largeur de bande, elles varient d'un facteur 2,6 environ à Molène et de plus de 6 à Sein ; seule la localisation des zones est un résultat stable.
-- **Pas d'identification individuelle** : sans photo-identification, il est impossible d'attribuer les observations à un groupe, de distinguer résidents et individus de passage, ou d'estimer un véritable domaine vital ; les secteurs n'en sont qu'une approximation.
-- **Observations dépendantes et étalées dans le temps** : des observations proches peuvent concerner le même groupe, et elles couvrent `r res$annees[1]`–`r res$annees[2]` (`r fmt(pct_depuis2014)` % depuis 2014), alors que le trafic correspond à 2023.
-- **Trafic côtier sous-estimé** : l'AIS n'est obligatoire que pour une partie des navires ; les petites embarcations n'y figurent pas.
-- **Résolution** : bathymétrie à environ `r fmt(round(res$resolution_bathy_m, -1))` m et trafic à 1 km, grossiers pour une espèce côtière ; la densité estimée est limitée à la mer, ce qui peut déformer les contours près des côtes.
+- **Biais d'effort d'observation** : `r fmt(pct_jeu1)` % des observations proviennent d'un seul jeu de données opportuniste (`r nom_jeu1`), sans information sur l'effort de prospection. Le domaine vital estimé reflète autant la répartition des observateurs, souvent près des côtes et des ports, que l'usage réel de l'espace. Le chevauchement avec le trafic est en partie artificiel, de nombreuses observations étant réalisées depuis des bateaux.
+- **Décalage temporel** : `r fmt(pct_avant2011)` % des observations datent de 2001 à 2010 et `r n_apres2015` seulement sont postérieures à 2015, alors que le trafic correspond à l'année 2023.
+- **Méthode** : la largeur de bande de référence tend à surlisser la densité et à surestimer le domaine vital ; ici, l'isoplèthe 95 % (`r fmt(s95$surface_km2)` km²) est près de deux fois plus étendue que le MCP 95 % (`r fmt(smcp$surface_km2)` km²). Les surfaces sont donc des ordres de grandeur ; une sélection de la largeur de bande par validation croisée serait préférable avant toute utilisation en gestion.
+- **Absence d'identification individuelle** : sans photo-identification, il est impossible de distinguer les groupes résidents des individus de passage, ou d'estimer un domaine vital par groupe.
+- **Trafic côtier sous-estimé** : l'AIS n'est obligatoire que pour les grands navires ; la plupart des embarcations de plaisance et de pêche côtière n'y figurent pas.
+- **Résolution** : bathymétrie à environ `r fmt(round(res$resolution_bathy_m, -1))` m et trafic à 1 km, encore grossiers pour décrire la bande côtière fréquentée par l'espèce.
 
 ## Conclusion
 
-Cet exercice met en œuvre une chaîne d'analyse reproductible, du téléchargement des données publiques à leur contrôle et à leur croisement avec le trafic maritime. Il montre que ces données permettent de **retrouver les secteurs** où sont observés les deux groupes côtiers, à condition d'en contrôler la qualité, et de repérer **quelles activités traversent leurs zones** : à distance de la côte comparable, seuls les navires à passagers y sont plus présents. Elles ne permettent pas de délimiter un domaine vital, de démontrer une préférence d'habitat ni de mesurer des interactions : la comparaison avec les suivis montre que la localisation est cohérente, mais que les données publiques couvrent mal certains secteurs, comme l'ouest de la chaussée de Sein.
+Cet exercice met en œuvre, sur des données publiques, une chaîne d'analyse complète : bancarisation, estimation du domaine vital, analyse de l'habitat et croisement avec une pression. À partir de `r fmt(res$n_parc)` observations retenues sur `r fmt(j$n_restant[1])` enregistrements bruts, le cœur du domaine vital du grand dauphin est estimé à `r fmt(s50$surface_km2)` km² dans le golfe de Saint-Florent, et le domaine vital à 95 % à `r fmt(s95$surface_km2)` km², principalement sur le plateau continental de la côte ouest du Cap Corse. Les observations sont nettement plus côtières et moins profondes que le milieu disponible (profondeur médiane de `r fmt(h_obs$prof_mediane_m)` m contre `r fmt(h_dis$prof_mediane_m)` m).`r if (trafic_ok) paste0(" La densité médiane de navires équipés de l'AIS y est ", fmt(r_tous, 1), " fois plus élevée que dans le reste du Parc, et ", fmt(r_plai, 1), " fois pour la plaisance, ce qui suggère une exposition potentielle aux activités nautiques côtières.") else ""`
 
-À titre d'illustration seulement, voici comment ces résultats pourraient commencer à être lus du point de vue de la gestion ; les données et l'expertise du Parc conduiraient très probablement à d'autres conclusions.
+Compte tenu de ses limites (biais d'effort, décalage temporel entre observations et trafic, couverture partielle de l'AIS), ces résultats sont à lire comme une démonstration de méthode plutôt que comme un état des lieux. Le Parc dispose sans doute de données d'observation plus récentes et plus complètes ; le script a été conçu pour les intégrer : un fichier d'observations (longitude, latitude, date) déposé dans le dossier prévu suffit pour relancer l'ensemble de l'analyse.
 
-- **Un premier repérage** : les zones donnent une première image de la répartition des observations, à confronter aux données de photo-identification du Parc. Leur localisation est stable, mais leur surface varie fortement selon les choix d'analyse : estimer un domaine vital demanderait notamment la photo-identification, un effort d'observation connu et des données sur plusieurs saisons.
-- **Une lacune à vérifier** : l'ouest de la chaussée de Sein, vers Ar Men, n'est presque pas couvert par les données publiques ; le compte rendu de 2021 recommandait déjà de prospecter davantage ce secteur, ce qui a pu être fait depuis.
-- **Plusieurs usagers concernés** : la plaisance, la voile et les navires à passagers traversent les zones de concentration, et seraient à considérer dans une étude des interactions ; les navires à passagers y sont proportionnellement plus présents que sur le reste de la côte, et les petites embarcations, absentes de l'AIS, n'apparaissent pas dans ces données.
-- **Contrôler les données publiques avant de les bancariser** : versées telles quelles dans une base, les positions ramenées sur une grille créeraient de fausses concentrations et les doublons imprécis compteraient deux fois la même observation. Le script, qui les détecte automatiquement, pourrait servir à ce contrôle.
+**Utilisations possibles.** Appliqué à des données actualisées et assorties d'un effort d'observation connu, ce type d'analyse pourrait notamment servir à :
 
-Le script a été conçu pour intégrer d'autres données : un fichier d'observations (longitude, latitude, date) déposé dans le dossier prévu suffit pour relancer l'ensemble de l'analyse.
+- **localiser les secteurs où l'espèce et les activités humaines se superposent**, et ainsi cibler les zones et les périodes où une sensibilisation des usagers serait la plus utile ;
+- **orienter un plan d'échantillonnage**, en répartissant l'effort de suivi entre les secteurs bien connus et ceux qui restent peu prospectés ;
+- **constituer un état de référence reproductible**, pouvant être recalculé à intervalles réguliers pour suivre l'évolution du domaine vital et de l'exposition au trafic ;
+- **produire des cartes de synthèse** mobilisables dans les échanges avec les acteurs locaux et dans les avis ou documents de gestion ;
+- **comparer les sites** au moyen d'une méthode identique, par exemple entre le Cap Corse et l'Iroise.
 
-*Le code et la rédaction de cette note ont été réalisés avec l'aide d'un assistant d'IA (Claude, Anthropic). J'ai conduit la démarche, vérifié les données, les résultats et les références, et arbitré les choix de méthode et d'interprétation.*
+## Lexique
+
+| Terme | Définition |
+|---|---|
+| AIS | Système d'identification automatique : balise transmettant la position d'un navire, obligatoire pour les grands navires |
+| Isoplèthe | Contour délimitant la plus petite surface qui contient une proportion donnée (50 %, 95 %) de la densité estimée |
+| Largeur de bande | Paramètre fixant l'étalement de chaque noyau dans l'estimation par noyau |
+| MCP | Polygone convexe minimum : enveloppe convexe des observations |
+| Plateau continental | Zone de faibles profondeurs (jusqu'à environ 200 m) bordant la côte |
+| Pseudo-réplication | Fait de traiter comme indépendantes des observations répétées d'un même groupe |
+| Rapport de cotes | Facteur multiplicatif de la cote (probabilité / (1 − probabilité)) associé à une variation d'une unité de la variable explicative |
+| Test de Wilcoxon | Test non paramétrique comparant les distributions de deux groupes à partir des rangs des valeurs |
 
 ## Références
 
-- Buanic M. (2021). *Compte-rendu 2020 : suivis par photo-identification du groupe côtier de grands dauphins de la Chaussée de Sein*. OFB, Parc naturel marin d'Iroise.
-- Buanic M. (2022). *Compte-rendu 2021 : suivis par photo-identification du groupe côtier de grands dauphins de la Chaussée de Sein*. OFB, Parc naturel marin d'Iroise.
-- Couet P., Eloi D., Mauger G. (2021). *Étude de la population de grands dauphins de l'archipel de Molène – année 2020*. GECC, pour l'OFB – Parc naturel marin d'Iroise.
-- Louis M., Viricel A., Lucas T., Peltier H., Alfonsi E., Berrow S., Brownlow A., Covelo P., Dabin W., Deaville R., de Stephanis R., Gally F., Gauffier P., Penrose R., Silva M. A., Guinet C., Simon-Bouhet B. (2014). Habitat-driven population structure of bottlenose dolphins, *Tursiops truncatus*, in the North-East Atlantic. *Molecular Ecology*, 23(4), 857–874.
+- Labach H., Gimenez O., Barbier M., Jourdan J., David L., Di-Méglio N., Roul M., Azzinari C., Robert N., Tomasi N. (2015). *Étude de la population et de la conservation du Grand Dauphin en Méditerranée française*. Projet GDEGeM 2013-2015, rapport GIS3M.
+- Labach H., Azzinari C., Barbier M., Cesarini C., Daniel B., David L., Dhermain F., Di-Méglio N., Guichard B., Jourdan J., Lauret V., Robert N., Roul M., Tomasi N., Gimenez O. (2022). Distribution and abundance of common bottlenose dolphin (*Tursiops truncatus*) over the French Mediterranean continental shelf. *Marine Mammal Science*, 38(1), 212–222.
 - Manly B. F. J., McDonald L. L., Thomas D. L., McDonald T. L., Erickson W. P. (2002). *Resource selection by animals: statistical design and analysis for field studies* (2^e^ éd.). Kluwer Academic Publishers.
+- MNHN (2019). Formulaire standard de données Natura 2000, site FR9402019 « Grands dauphins de l'Agriate ». INPN.
+- Seaman D. E., Millspaugh J. J., Kernohan B. J., Brundige G. C., Raedeke K. J., Gitzen R. A. (1999). Effects of sample size on kernel home range estimates. *Journal of Wildlife Management*, 63(2), 739–747.
 - Worton B. J. (1989). Kernel methods for estimating the utilization distribution in home-range studies. *Ecology*, 70(1), 164–168.
 
-**Sources de données** (consultées en octobre 2026) : OBIS (obis.org) ; GBIF (gbif.org) ; NOAA National Centers for Environmental Information (2022), *ETOPO 2022 15 Arc-Second Global Relief Model*, doi:10.25921/fd45-gt74 ; EMODnet Human Activities, *Vessel density maps*, 2023 ; PatriNat (OFB, MNHN, CNRS, IRD), base des espaces protégés, juillet 2026.
+**Sources de données** (consultées en octobre 2026) : OBIS, Ocean Biodiversity Information System (obis.org) ; GBIF, Global Biodiversity Information Facility (gbif.org) ; NOAA National Centers for Environmental Information (2022), *ETOPO 2022 15 Arc-Second Global Relief Model*, doi:10.25921/fd45-gt74 ; EMODnet Human Activities, *Vessel density maps*, 2023 ; PatriNat (OFB, MNHN, CNRS, IRD), base des espaces protégés, juillet 2026.
 
-*Code, données nettoyées et résultats : <https://github.com/gwladys-helaine/delfinu-iroise>. Analyse reproductible, réalisée sous R (sf, terra, ggplot2) et Quarto ; base PostgreSQL/PostGIS de démonstration.*
-
-```{=typst}
-#pagebreak()
-#set par(justify: false)
-#set text(hyphenate: false)
-```
-
-## Annexe 1 – Étapes du nettoyage des observations
-
-Les filtres sont appliqués dans l'ordre du tableau : un enregistrement retiré à une étape n'est plus compté aux suivantes. Avant ces étapes, la requête au GBIF ne retient que les enregistrements géolocalisés et sans problème géographique signalé par le portail.
-
-```{r}
-#| label: nettoyage
-#| tbl-colwidths: [16, 64, 10, 10]
-regles <- list(
-  "Données brutes"     = c("Données de départ", "Enregistrements OBIS et GBIF, réduits à dix colonnes communes"),
-  "Coordonnées"        = c("Coordonnées", "Longitude et latitude présentes et dans les bornes possibles"),
-  "absence"            = c("Absences", "Statut « absent » exclu"),
-  "Spécimens"          = c("Spécimens", "Spécimens de collection exclus"),
-  "chouages"           = c("Échouages", "Jeux dont le nom contient « échouage » ou « stranding » exclus"),
-  "Doublons supprimés" = c("Doublons exacts", "Une ligne par position (arrondie à environ 100 m) et par date"),
-  "Date connue"        = c("Dates", "Date connue et année ≥ 2000"),
-  "Précision"          = c("Précision", "Incertitude déclarée ≤ 5 km ; enregistrements sans incertitude déclarée conservés"),
-  "grille"             = c("Positions sur grille", "Longitude et latitude toutes deux multiples exacts de 5′ exclues"),
-  "terre"              = c("Points à terre", "Altitude lue sur la bathymétrie de 20 m ou plus exclue"),
-  "imprécis exclus"    = c("Doublons imprécis", "Incertitude ≥ 5 km exclue si un autre jeu donne, le même jour et à moins de 10 km, une position plus précise ou de précision non déclarée"),
-  "floutés"            = c("Doublons imprécis", "Incertitude ≥ 5 km exclue si un autre jeu donne, le même jour et à moins de 10 km, une position plus précise ou de précision non déclarée"),
-  "Agrégation"         = c("Agrégation", "Une observation par carré de 1 km et par jour"),
-  "dans le Parc"       = c("Parc", "Observations situées dans la partie marine du Parc")
-)
-decrire <- function(etape) {
-  k <- names(regles)[vapply(names(regles), function(m) grepl(m, etape, fixed = TRUE), logical(1))]
-  if (length(k) == 0) c(etape, "") else regles[[k[1]]]
-}
-d_n <- t(vapply(j$etape, decrire, character(2), USE.NAMES = FALSE))
-tab_n <- data.frame(
-  Etape   = d_n[, 1],
-  Regle   = d_n[, 2],
-  Retires = c("–", fmt(-diff(j$n_restant))),
-  Restant = fmt(j$n_restant)
-)
-knitr::kable(tab_n, align = "llrr", col.names = c("Étape", "Règle appliquée", "Retirés", "Restant"))
-```
-
-Les observations situées hors du Parc ne sont pas des données erronées : elles sont conservées comme contexte sur les cartes.
-
-```{=typst}
-#pagebreak()
-```
-
-## Annexe 2 – Sources de données identifiées (liste non exhaustive)
-
-Ce tableau rassemble les sources repérées au cours de cet exercice, à partir de documents publics consultés en octobre 2026. Il n'est pas exhaustif : d'autres données existent certainement, notamment au sein du Parc et de ses partenaires, et les informations sur les données non publiques ne sont données qu'à titre indicatif. Il indique pour chaque source si l'effort d'observation est connu, condition nécessaire pour distinguer la présence des dauphins de celle des observateurs.
-
-| Source (producteur) | Contenu | Effort | Accès | Apport pour le groupe de Sein |
-|:-----------------|:------------------|:------|:-------------|:------------------|
-| Photo-identification, groupe de Sein (Parc) | Sorties en mer depuis 2010 ; données de domaine vital exploitables depuis 2014 | Oui | Interne ; comptes rendus publics | Source principale : domaine vital par groupe ou par individu |
-| Photo-identification, groupe de Molène (Parc ; analyses GECC) | Catalogue depuis 2007 ; capture-recapture 2014–2020 | Oui | Interne ; rapports publics | Comparaison entre groupes, échanges d'individus |
-| Programme génétique Molène–Sein (Parc ; ISYEB, MNHN – UBO) | Prélèvements cutanés non invasifs, 2021–2023 ; résultats non disponibles dans les documents consultés | — | Partenaires | Liens entre côtiers, large et passage |
-| OBSenMER (GECC, Cybelle Planète) | Observations participatives, mode « avec effort » (veille d'au moins 15 min), activités humaines | Partiel | En ligne ; extraction auprès du GECC | Observations récentes avec effort ; usages hors AIS |
-| Suivis aériens Pelagis, dont SAMM | Survols selon un protocole, 2002–2020 | Non publié | Positions publiques (CC-BY-NC) ; effort non diffusé | Répartition au large |
-| Observations opportunistes (GBIF, OBIS) | Observations ponctuelles, 2002–2026 | Non | Public | Présence seule ; utilisées dans cette note |
-| OpenObs (SINP, PatriNat) | Agrégation nationale | Variable | Public, localisations parfois dégradées | Compléments à GBIF, à dédoublonner |
-| Réseau national d'échouages (Pelagis) | Échouages, causes de mortalité | — | Bilans publiés ; données sur demande | Indices d'interactions, avec prudence |
-| Densité de navires (EMODnet) | Trafic AIS par catégorie | — | Public | Utilisée dans cette note |
-| Usages nautiques hors AIS | Plaisance légère, kayak, plongée, sorties d'observation | — | À rechercher | Pression non couverte par l'AIS |
-| Bathymétrie HOMONIM (SHOM) | MNT à environ 111 m | — | Public (Licence Ouverte) | Habitat plus fin que ETOPO (~480 m) |
+*Code, données nettoyées et résultats : <https://github.com/gwladys-helaine/delfinu-domaine-vital>. Analyse entièrement reproductible, réalisée sous R (sf, terra, ggplot2), QGIS et Quarto.*
